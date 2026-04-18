@@ -12,6 +12,8 @@ homepage = "https://github.com/linux-china/duckman"
 repository = "https://github.com/linux-china/duckman"
 license = "MIT"
 
+default-run = "duckman"
+
 [[bin]]
 name = "duckman"
 path = "src/main.rs"
@@ -25,11 +27,19 @@ tokio = { version = "1.52", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 csv = "1.4"
-reqwest = { version = "0.13", features = ["json"] }
+reqwest = { version = "0.13", features = ["json", "stream"] }
 clap = "4.6"
 clap_complete = "4.6"
 colored = "3.1"
 prettytable-rs = "0.10"
+zip = "2"
+dirs = "5"
+anyhow = "1"
+indicatif = "0.17"
+futures-util = { version = "0.3", default-features = false, features = ["std"] }
+flate2 = "1"
+toml = "1.1.2+spec-1.1.0"
+lazy_static = "1.5.0"
 
 [dev-dependencies]
 testresult = "0.4.1"
