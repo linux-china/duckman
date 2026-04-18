@@ -1,0 +1,29 @@
+Name,Description,Maintainer,Support tier,Aliases
+autocomplete,Adds support for autocomplete in the shell,DuckDB team,Secondary,
+avro,Add support for reading Avro files,DuckDB team,Secondary,
+aws,Provides features that depend on the AWS SDK,DuckDB team,Secondary,
+azure,Adds a filesystem abstraction for Azure blob storage to DuckDB,DuckDB team,Secondary,
+delta,Adds support for Delta Lake,DuckDB team,Secondary,
+ducklake,Adds support for DuckLake,DuckDB team,Secondary,
+encodings,Adds support for encodings available in the ICU data repository,DuckDB team,Secondary,
+excel,Adds support for reading and writing Excel files,DuckDB team,Secondary,
+fts,Adds support for full-text search indexes,DuckDB team,Secondary,
+httpfs,Adds support for reading/writing files over an HTTP(S) or S3 connection,DuckDB team,Primary,"http, https, s3"
+iceberg,Adds support for Apache Iceberg,DuckDB team,Secondary,
+icu,Adds support for time zones and collations using the ICU library,DuckDB team,Primary,
+inet,Adds support for IP-related data types and functions,DuckDB team,Secondary,
+jemalloc,Overwrites the system allocator with jemalloc,DuckDB team,Secondary,
+json,Adds support for JSON operations,DuckDB team,Primary,
+lance,Adds support for the Lance file format,Third party,,
+motherduck,Allows connecting to MotherDuck,Third party,,md
+mysql,Adds support for reading from and writing to a MySQL database,DuckDB team,Secondary,mysql_scanner
+parquet,Adds support for reading and writing Parquet files,DuckDB team,Primary,
+postgres,Adds support for reading from and writing to a PostgreSQL database,DuckDB team,Secondary,postgres_scanner
+spatial,Adds support for working with geospatial data and functions,DuckDB team,Secondary,
+sqlite,Adds support for reading from and writing to SQLite database files,DuckDB team,Secondary,"sqlite_scanner, sqlite3"
+tpcds,Adds TPC-DS data generation and query support,DuckDB team,Secondary,
+tpch,Adds TPC-H data generation and query support,DuckDB team,Secondary,
+unity_catalog,Adds support for connecting to Unity Catalog,DuckDB team,Secondary,uc_catalog
+ui,Adds local UI for DuckDB,Third party,,
+vortex,Adds support for reading and writing Vortex files,Third party,,
+vss,Adds support for vector similarity search queries,DuckDB team,Secondary,
