@@ -44,7 +44,19 @@ pub fn build_duckman_app() -> Command {
         );
     // extension manager
     let extension_command = Command::new("extension").about("Manage DuckDB extensions");
+    // profile manager
     let profile_command = Command::new("profile").about("Manage profiles");
+    // completion
+    let completion_command = Command::new("completion")
+        .about("Output auto-completion script for bash/zsh/fish/powershell")
+        .arg(
+            Arg::new("shell")
+                .long("shell")
+                .help("shell name: bash, zsh, fish, powershell")
+                .value_parser(["bash", "zsh", "first", "powershell"])
+                .num_args(1)
+                .required(false),
+        );
     Command::new("duckman")
         .version(VERSION)
         .author("linux_china <libing.chen@gmail.com>")
@@ -64,4 +76,5 @@ pub fn build_duckman_app() -> Command {
         .subcommand(default_command)
         .subcommand(extension_command)
         .subcommand(profile_command)
+        .subcommand(completion_command)
 }
