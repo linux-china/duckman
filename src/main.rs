@@ -2,10 +2,82 @@ use crate::duckman_app::build_duckman_app;
 use std::env;
 use std::ffi::OsString;
 
+mod commands;
 mod duckman_app;
+mod duckman_config;
+mod ext_commands;
+mod github;
+mod profile_commands;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> anyhow::Result<()> {
+    let matches = build_duckman_app().get_matches();
+
+    match matches.subcommand() {
+        Some(("list", m)) => {
+            let local = m.get_flag("local");
+            let remote = m.get_flag("remote");
+            commands::list_versions(local, remote).await?;
+        }
+        Some(("install", m)) => {
+            let version = m.get_one::<String>("version").unwrap();
+            commands::install_version(version).await?;
+        }
+        Some(("uninstall", m)) => {
+            let version = m.get_one::<String>("version").unwrap();
+            commands::uninstall_version(version).await?;
+        }
+        Some(("run", m)) => {
+            let version = m.get_one::<String>("version").map(|s| s.as_str());
+            // Collect everything after `--` from the raw process args
+            let raw: Vec<String> = env::args().collect();
+            let extra_args: Vec<String> = raw
+                .iter()
+                .skip_while(|a| *a != "--")
+                .skip(1)
+                .cloned()
+                .collect();
+            commands::run_duckdb(version, extra_args)?;
+        }
+        Some(("default", m)) => {
+            let version = m.get_one::<String>("version").unwrap();
+            commands::set_default_version(version)?;
+        }
+        Some(("ext", m)) => match m.subcommand() {
+            Some(("list", sm)) => {
+                let remote = sm.get_flag("remote");
+                ext_commands::list_extensions(remote)?;
+            }
+            Some(("install", sm)) => {
+                let name = sm.get_one::<String>("name").unwrap();
+                ext_commands::install_extension(name).await?;
+            }
+            Some(("uninstall", sm)) => {
+                let name = sm.get_one::<String>("name").unwrap();
+                ext_commands::uninstall_extension(name)?;
+            }
+            Some(("update", _)) => {
+                ext_commands::update_extensions()?;
+            }
+            _ => unreachable!(),
+        },
+        Some(("profile", m)) => match m.subcommand() {
+            Some(("list", _)) => profile_commands::list_profiles()?,
+            _ => unreachable!(),
+        },
+        Some(("completion", _m)) => {
+            // TODO: implement shell completion generation
+            println!("Completion generation not yet implemented.");
+        }
+        _ => {
+            build_duckman_app().print_help()?;
+        }
+    }
+
+    Ok(())
+}
+
+fn get_sub_command() -> Option<String> {
     let mut raw_args: Vec<OsString> = env::args_os().collect();
     // get sub command name
     let mut sub_command_name = "".to_owned();
@@ -18,9 +90,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         } else {
             sub_command_name = arg_1;
         }
-        print!("sub command: {}", sub_command_name);
     }
-    let app = build_duckman_app();
-    let matches = app.get_matches_from(raw_args);
-    Ok(())
+    if sub_command_name == "" {
+        return None;
+    }
+    Some(sub_command_name)
 }
