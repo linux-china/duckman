@@ -14,24 +14,27 @@ Features:
 5. Profile Manager: secrets, S3, required extensions etc.
 6. MotherDuck integration
 7. DuckLake integration
-8. Iceberg integration 
+8. Iceberg integration
 
 ## profiles
 
 name, description, default duckdb version
 
+- basic info: name, description, DuckDB version
 - required extensions
-- secret
+- secrets
 - environment variables
-- s3
+- S3 bucket list
 - attached db
 - ducklake
 
-# extension sub command 
+If profile name is default, and it means that this profile will be used as the default profile when running DuckDB.
+
+# extension sub command
 
 - install/uninstall extension
 - list extensions
-- init: create a new extension with Rust/C++ 
+- init: create a new extension with Rust/C++
 
 # Environment variable
 
@@ -43,7 +46,6 @@ name, description, default duckdb version
 DuckDB version: md
 
 - DuckDB version for md:  specified by MotherDuck
-
 
 # References
 
