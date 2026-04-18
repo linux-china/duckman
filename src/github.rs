@@ -39,7 +39,11 @@ pub async fn fetch_releases() -> anyhow::Result<Vec<GitHubRelease>> {
         .get("https://api.github.com/repos/duckdb/duckdb/releases")
         .header("User-Agent", "Duckman/0.1.0")
         .header("Accept", "application/vnd.github.v3+json");
-    let releases = add_auth(req).send().await?.json::<Vec<GitHubRelease>>().await?;
+    let releases = add_auth(req)
+        .send()
+        .await?
+        .json::<Vec<GitHubRelease>>()
+        .await?;
     Ok(releases)
 }
 
@@ -58,5 +62,25 @@ pub async fn fetch_release(version: &str) -> anyhow::Result<Option<GitHubRelease
         Ok(Some(response.json::<GitHubRelease>().await?))
     } else {
         Ok(None)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use testresult::TestResult;
+
+    #[tokio::test]
+    async fn test_fetch_releases() -> TestResult {
+        let releases = fetch_releases().await?;
+        assert!(!releases.is_empty());
+        for release in releases {
+            println!(
+                "{},{}",
+                release.tag_name,
+                release.published_at.as_ref().unwrap()
+            );
+        }
+        Ok(())
     }
 }
