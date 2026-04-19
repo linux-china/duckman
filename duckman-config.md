@@ -44,12 +44,15 @@ duckman run v1.5.2 --profile myprofile
 [profile.analytics]
 description = "Analytics workload with S3 and Delta Lake"
 duckdb_version = "v1.5.2"   # optional — overrides the top-level default
+init_sql = '''
+'''
 ```
 
-| Field            | Type   | Description                                   |
-|------------------|--------|-----------------------------------------------|
-| `description`    | string | Human-readable description                    |
-| `duckdb_version` | string | Pin this profile to a specific DuckDB version |
+| Field            | Type   | Description                                                  |
+|------------------|--------|--------------------------------------------------------------|
+| `description`    | string | Human-readable description                                   |
+| `duckdb_version` | string | Pin this profile to a specific DuckDB version                |
+| `init_sql`       | string | SQL commands to execute at startup after all resources setup |
 
 ---
 
@@ -276,7 +279,8 @@ data_path = "s3://my-bucket/lake-data"
 Generated SQL:
 
 ```sql
-ATTACH 'ducklake:postgres:dbname=ducklake host=127.0.0.1 port=5432 user=ducklake password=123456' AS prod_lake (DATA_PATH 's3://my-bucket/lake-data');
+ATTACH
+'ducklake:postgres:dbname=ducklake host=127.0.0.1 port=5432 user=ducklake password=123456' AS prod_lake (DATA_PATH 's3://my-bucket/lake-data');
 ```
 
 #### Raw SQL override
