@@ -116,3 +116,38 @@ rapidfuzz,Provides adds high-performance fuzzy string matching functions powered
 raquet,Raster analytics on Raquet files with QUADBIN spatial indexing raster ingestion and PostGIS-style functions
 raster,DuckDB Extension for reading and writing raster files using SQL.
 rate_limit_fs,Perform rate and burst limit on filesystem
+rdf,A DuckDB extension to read and write RDF
+read_dbf,Read DBF (dBase) files with support for general DBF formats and field types.
+read_lines,"Read line-based text files with line numbers and efficient subset extraction. Supports glob patterns, line selection, and context lines around matches."
+read_stat,"Read data sets from SAS, Stata, and SPSS with ReadStat"
+redis,Redis compatible Client for DuckDB
+rusty_sheet,An Excel/WPS/OpenDocument Spreadsheets file reader for DuckDB
+scalarfs,A collection of virtual filesystems for working with scalars
+scrooge,"Provides functionality for financial data-analysis, including data scanners for the Ethereum Blockchain and Yahoo Finance"
+se3,Provides SE(3) rigid transformations (combinations of rotations and translations in 3D) as DuckDB scalar functions.
+sheetreader,Fast XLSX file importer
+shellfs,Allow shell commands to be used for input and output
+sistat,Query Slovenia's SiStat (SURS PX-Web API) open data directly from DuckDB with SQL.
+sitemap,Parse XML sitemaps from websites with automatic discovery via robots.txt
+sitting_duck,"Parse and analyze source code ASTs from 27 programming languages with tree-sitter grammars, pattern matching, and structural search"
+snowflake,Snowflake data source extension - query Snowflake databases directly from DuckDB
+splink_udfs,"Phonetic, text normalization and address matching functions for record linkage."
+sshfs,Allows reading and writing files over SSH
+stochastic,"Add comprehensive statistical distribution functions to DuckDB, enabling advanced statistical analysis, probability calculations, and random sampling directly within SQL queries."
+sudan,"Unified SQL access to Sudan's humanitarian, development, and geospatial data from 5 international APIs (World Bank, WHO, FAO, UNHCR, ILO)"
+system_stats,Provides table functions to access system-level statistics for monitoring purpose
+table_inspector,"Observability into DuckDB storage internals at the database, table, and column levels"
+talib,Technical Analysis Library (TA-Lib) functions for DuckDB – 100+ indicators for financial market analysis
+tera,"Adds templating to DuckDB, enabling dynamic generation of text, HTML, and reports directly within SQL queries using the Tera engine."
+textplot,"Enables text-based data visualization directly in SQL queries, including ASCII/Unicode bar charts, density plots, and sparklines for lightweight analytics and dashboards."
+tsid,DuckDB Time-Sortable ID generator
+valhalla_routing,DuckDB extension for routing and travel time calculations using Valhalla routing engine
+web_archive,Query Common Crawl and Wayback Machine web archive CDX APIs directly from SQL
+web_search,Query Google Custom Search API directly from SQL with filter pushdowns
+webbed,"Comprehensive processing extension for web markup languages (XML and HTML) with SAX streaming for large files, intelligent schema inference, XPath-based data extraction, and HTML table parsing."
+whisper,"Speech-to-text transcription using whisper.cpp, OpenAI's Whisper model"
+wireduck,Read and dissect PCAP files from DuckDB
+yaml,"Read YAML files into DuckDB with native YAML type support, comprehensive extraction functions, and seamless JSON interoperability"
+yardstick,Measure-aware SQL implementing Julian Hyde's 'Measures in SQL' paper
+zeek,Read Zeek network security monitor log files with automatic schema detection and type-aware parsing
+zipfs,Read files within zip archives
