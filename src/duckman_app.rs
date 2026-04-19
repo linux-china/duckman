@@ -92,7 +92,6 @@ pub fn build_duckman_app() -> Command {
         .subcommand(ext_install)
         .subcommand(ext_uninstall)
         .subcommand(ext_update);
-    let extension_command = Command::new("extension").about("Manage DuckDB extensions");
     // profile manager
     let profile_list = Command::new("list").about("List all profiles");
     let profile_command = Command::new("profile")
@@ -128,7 +127,6 @@ pub fn build_duckman_app() -> Command {
         .subcommand(run_command)
         .subcommand(default_command)
         .subcommand(ext_command)
-        .subcommand(extension_command)
         .subcommand(profile_command)
         .subcommand(completion_command)
 }
