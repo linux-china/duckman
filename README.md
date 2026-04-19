@@ -68,6 +68,14 @@ Migration is not real one, just install the extensions on new DuckDB version.
 $ duckman --duckdb 1.5.2 ext migrate 1.4.4
 ```
 
+### How to install DuckDB for Duckman from local zip file?
+
+You just execute:
+
+```
+$ unzip -d $HOME/.duckdb/versions/v1.5.2 duckdb_cli-osx-amd64.zip
+```
+
 ### How does Duckman choose profile?
 
 - option first: `--profile xxx`
