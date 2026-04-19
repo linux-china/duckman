@@ -78,6 +78,7 @@ pub struct AttachedDb {
 pub struct DuckLake {
     pub catalog_endpoint: String,
     pub data_path: String,
+    pub sql: Option<String>,
 }
 
 impl DuckmanConfig {
@@ -209,6 +210,17 @@ pub fn convert_attached_db_to_sql(name: &str, db: &AttachedDb) -> String {
     format!(
         "ATTACH '{}' AS {} ( type {});",
         db.endpoint, name, db.db_type
+    )
+}
+
+pub fn convert_ducklake_to_sql(name: &str, db: &DuckLake) -> String {
+    if let Some(sql) = db.sql.as_ref() {
+        // replace \n with space and convert to one-line string
+        return sql.trim().replace('\n', " ");
+    }
+    format!(
+        "ATTACH  '{}'  as {} (DATA_PATH '{}');",
+        db.catalog_endpoint, name, db.data_path
     )
 }
 
