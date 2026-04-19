@@ -37,9 +37,6 @@ pub fn duckdb_execute(
             }
         }
     }
-
-    println!("args: {:?}", new_extra_args);
-
     // On Unix: replace this process with duckdb — stdin/stdout/stderr are
     // inherited automatically, so pipes work transparently.
     #[cfg(unix)]

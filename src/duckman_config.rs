@@ -362,31 +362,31 @@ pub fn inject_profile(
     // secrets
     for (name, value) in profile.secret.iter() {
         let sql = convert_secret_to_sql(name, value);
-        args.push("-c".to_owned());
+        args.push("-cmd".to_owned());
         args.push(sql);
     }
     // buckets
     for (name, value) in profile.bucket.iter() {
         let sql = convert_bucket_to_sql(name, value);
-        args.push("-c".to_owned());
+        args.push("-cmd".to_owned());
         args.push(sql);
     }
     // parquet key
     if let Some(parquet_key) = &profile.parquet_key {
         let sql = format!("PRAGMA add_parquet_key('key256','{}');", parquet_key);
-        args.push("-c".to_owned());
+        args.push("-cmd".to_owned());
         args.push(sql);
     }
     // attached databases
     for (name, attached_db) in profile.attached.iter() {
         let sql = convert_attached_db_to_sql(name, attached_db);
-        args.push("-c".to_owned());
+        args.push("-cmd".to_owned());
         args.push(sql);
     }
     // ducklake
     for (name, ducklake) in profile.ducklake.iter() {
         let sql = convert_ducklake_to_sql(name, ducklake);
-        args.push("-c".to_owned());
+        args.push("-cmd".to_owned());
         args.push(sql);
     }
 }
