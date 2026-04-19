@@ -9,6 +9,7 @@ mod duckman_config;
 mod ext_commands;
 mod github;
 mod profile_commands;
+mod runner;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -52,7 +53,7 @@ async fn main() -> anyhow::Result<()> {
             }
             Some(("install", sm)) => {
                 let name = sm.get_one::<String>("name").unwrap();
-                ext_commands::install_extension(name).await?;
+                ext_commands::install_extension(None, name).await?;
             }
             Some(("uninstall", sm)) => {
                 let name = sm.get_one::<String>("name").unwrap();
