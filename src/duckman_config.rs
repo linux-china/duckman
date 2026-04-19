@@ -263,7 +263,7 @@ pub fn convert_bucket_to_sql(name: &str, bucket: &toml::Table) -> String {
     let mut sql = format!("CREATE OR REPLACE SECRET {} (", name);
     for (key, value) in bucket {
         let mut value = convert_toml_value_to_sql_value(value);
-        if key.eq_ignore_ascii_case("type") {
+        if key.eq_ignore_ascii_case("type") || key.eq_ignore_ascii_case("provider") {
             value = value.trim_matches('\'').to_string();
         }
         sql.push_str(&format!(" {} {},", key, value));
