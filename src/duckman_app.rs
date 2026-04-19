@@ -6,6 +6,13 @@ pub fn build_duckman_app() -> Command {
     let run_command = Command::new("run")
         .about("Run a specific version of DuckDB")
         .arg(
+            Arg::new("profile")
+                .long("profile")
+                .help("Profile to run")
+                .num_args(1)
+                .required(false),
+        )
+        .arg(
             Arg::new("version")
                 .help("DuckDB version to run (default: $DUCKDB_VERSION or configured default)")
                 .index(1)
