@@ -144,6 +144,28 @@ impl DuckmanConfig {
         Self::home_dir().join("duckman.toml")
     }
 
+    pub fn installed_versions() -> Vec<String> {
+        let versions_dir = Self::versions_dir();
+        if !versions_dir.exists() {
+            return Vec::new();
+        }
+        let mut versions: Vec<String> = fs::read_dir(&versions_dir)
+            .map(|rd| {
+                rd.filter_map(|e| {
+                    let entry = e.ok()?;
+                    if entry.path().is_dir() {
+                        Some(entry.file_name().to_string_lossy().to_string())
+                    } else {
+                        None
+                    }
+                })
+                .collect()
+            })
+            .unwrap_or_default();
+        versions.sort();
+        versions
+    }
+
     pub fn is_duckdb_installed(duckdb_version: &str) -> bool {
         Self::version_binary(duckdb_version).exists()
     }
@@ -175,7 +197,7 @@ impl DuckmanConfig {
         if self.default.is_some() {
             return Some(self.default.clone().unwrap());
         }
-        let versions = self.installed_versions();
+        let versions = Self::installed_versions();
         if let Some(version) = versions.into_iter().next() {
             return Some(version);
         }
@@ -188,28 +210,6 @@ impl DuckmanConfig {
         let content = toml::to_string_pretty(self)?;
         fs::write(Self::config_file(), content)?;
         Ok(())
-    }
-
-    pub fn installed_versions(&self) -> Vec<String> {
-        let versions_dir = Self::versions_dir();
-        if !versions_dir.exists() {
-            return Vec::new();
-        }
-        let mut versions: Vec<String> = fs::read_dir(&versions_dir)
-            .map(|rd| {
-                rd.filter_map(|e| {
-                    let entry = e.ok()?;
-                    if entry.path().is_dir() {
-                        Some(entry.file_name().to_string_lossy().to_string())
-                    } else {
-                        None
-                    }
-                })
-                .collect()
-            })
-            .unwrap_or_default();
-        versions.sort();
-        versions
     }
 
     pub fn set_default(&mut self, version: &str) {
