@@ -15,7 +15,7 @@ fn binary_name() -> &'static str {
 }
 
 lazy_static! {
-    static ref EMPTY_PROFILES: HashMap<String, Profile> = { HashMap::new() };
+    static ref EMPTY_PROFILES: HashMap<String, Profile> = HashMap::new();
 }
 pub fn duckman_home_dir() -> PathBuf {
     dirs::home_dir()
@@ -180,6 +180,16 @@ mod tests {
     #[test]
     fn test_load_from() -> TestResult {
         let config = DuckmanConfig::load_from("duckman.toml")?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_load_profiles() -> TestResult {
+        let config = DuckmanConfig::load_from("duckman.toml")?;
+        for entry in config.get_profiles() {
+            println!("{}", entry.0);
+            println!("{:?}", entry.1);
+        }
         Ok(())
     }
 }
