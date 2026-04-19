@@ -15,6 +15,7 @@ Features:
 6. MotherDuck integration
 7. DuckLake integration
 8. dotenv support: `.env` autoload into environment variables for `getenv('XXX')`
+9. Duckman shim: a wrapper for DuckDB executable, it is used to switch DuckDB version and profile
 
 ## profiles
 
