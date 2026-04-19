@@ -71,6 +71,7 @@ pub struct AttachedDb {
     pub db_type: String,
     pub endpoint: String,
     pub encryption_key: Option<String>,
+    pub sql: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -198,6 +199,17 @@ pub fn convert_bucket_to_sql(name: &str, bucket: &toml::Table) -> String {
     //sql = sql[0..sql.len() - 2].to_string();
     sql.push_str(");");
     sql
+}
+
+pub fn convert_attached_db_to_sql(name: &str, db: &AttachedDb) -> String {
+    if let Some(sql) = db.sql.as_ref() {
+        // replace \n with space and convert to one-line string
+        return sql.trim().replace('\n', " ");
+    }
+    format!(
+        "ATTACH '{}' AS {} ( type {});",
+        db.endpoint, name, db.db_type
+    )
 }
 
 fn convert_toml_value_to_sql_value(value: &toml::Value) -> String {
