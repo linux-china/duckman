@@ -10,8 +10,8 @@ use std::{env, fs};
 // Platform identifier used in the extensions URL and install pat
 fn find_duckdb_binary() -> anyhow::Result<PathBuf> {
     // find specified version
-    if let Some(duckdb_version) = env::var("DUCKDB_VERSION") {
-        return Ok(DuckmanConfig::version_binary(duckdb_version));
+    if let Ok(duckdb_version) = env::var("DUCKDB_VERSION") {
+        return Ok(DuckmanConfig::version_binary(&duckdb_version));
     }
     // load default from config
     let config = DuckmanConfig::load()?;
