@@ -222,7 +222,8 @@ impl DuckmanConfig {
     }
 
     pub fn set_default(&mut self, version: &str) {
-        self.default = Some(version.to_string());
+        let duckdb_version = normalize_duckdb_version(version);
+        self.default = Some(duckdb_version);
     }
 
     pub fn get_profiles(&self) -> &HashMap<String, Profile> {
