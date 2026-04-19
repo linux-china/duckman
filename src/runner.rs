@@ -26,13 +26,13 @@ pub fn duckdb_execute(
         // default profile check
         if let Some(default_profile) = profiles.get("default") {
             //println!("Using default profile: {}", "default");
-            inject_profile(default_profile, &mut new_extra_args, &mut new_env)
+            inject_profile(duckdb_version, default_profile, &mut new_extra_args, &mut new_env)
         }
         if let Some(profile_name) = duckdb_profile {
             if profile_name != "default" {
                 if let Some(profile) = profiles.get(profile_name) {
                     //println!("Using profile: {}", profile_name);
-                    inject_profile(profile, &mut new_extra_args, &mut new_env)
+                    inject_profile(duckdb_version, profile, &mut new_extra_args, &mut new_env)
                 }
             }
         }
