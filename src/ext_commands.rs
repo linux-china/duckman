@@ -88,13 +88,20 @@ fn list_remote_extensions() -> anyhow::Result<()> {
 
 // ── install ───────────────────────────────────────────────────────────────────
 
-pub async fn install_extension(duckdb_version: Option<&str>, name: &str) -> anyhow::Result<()> {
+pub async fn install_extension(name: &str) -> anyhow::Result<()> {
+    let config = &DuckmanConfig::load()?;
     let duckdb = find_duckdb_binary()?;
+    let duckdb_version = config.get_duckdb_version(&None);
     let sql = if DUCKDB_CORE_EXTENSIONS.contains(&name) {
         format!("install {}", name)
     } else {
         format!("install {} from community", name)
     };
+    println!(
+        "Begin to install extension {} for DuckDB {}",
+        name.green(),
+        duckdb_version.unwrap_or("".to_owned())
+    );
     let output = Command::new(&duckdb).args(["-c", &sql]).output();
     match output {
         Ok(out) => {
@@ -163,7 +170,7 @@ mod tests {
     #[tokio::test]
     async fn test_install_extension() -> TestResult {
         let ext_name = "shellfs";
-        install_extension(None, ext_name).await?;
+        install_extension(ext_name).await?;
         Ok(())
     }
 }
