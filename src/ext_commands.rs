@@ -1,9 +1,9 @@
 use crate::duckman_config::DuckmanConfig;
 use colored::Colorize;
 use futures_util::StreamExt;
-use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
+use std::{env, fs};
 
 const CORE_EXTENSIONS_CSV: &str = include_str!("resources/core_extensions.csv");
 const COMMUNITY_EXTENSIONS_CSV: &str = include_str!("resources/community_extensions.csv");
@@ -39,66 +39,23 @@ const DUCKDB_CORE_EXTENSIONS: [&str; 28] = [
     "vss",
 ];
 
-// Platform identifier used in the extensions URL and install path
-fn platform_ext_id() -> &'static str {
-    if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
-        "osx_arm64"
-    } else if cfg!(target_os = "macos") {
-        "osx_amd64"
-    } else if cfg!(target_os = "linux") && cfg!(target_arch = "aarch64") {
-        "linux_arm64"
-    } else if cfg!(target_os = "linux") {
-        "linux_amd64"
-    } else if cfg!(target_os = "windows") {
-        "windows_amd64"
-    } else {
-        "linux_amd64"
-    }
-}
-
-fn find_duckdb_binary(duckdb_version: Option<&str>) -> anyhow::Result<PathBuf> {
+// Platform identifier used in the extensions URL and install pat
+fn find_duckdb_binary() -> anyhow::Result<PathBuf> {
     // find specified version
-    if let Some(duckdb_version) = duckdb_version {
+    if let Some(duckdb_version) = env::var("DUCKDB_VERSION") {
         return Ok(DuckmanConfig::version_binary(duckdb_version));
     }
+    // load default from config
     let config = DuckmanConfig::load()?;
-    if !config.default.is_none() {
-        let path = DuckmanConfig::version_binary(&config.default.clone().unwrap());
-        if path.exists() {
-            return Ok(path);
-        }
-    }
-    for version in config.installed_versions() {
-        let path = DuckmanConfig::version_binary(&version);
-        if path.exists() {
-            return Ok(path);
-        }
+    if let Some(duckdb_version) = config.get_duckdb_version() {
+        return Ok(DuckmanConfig::version_binary(&duckdb_version));
     }
     // Fall back to duckdb in PATH
-    Ok(PathBuf::from("duckdb"))
-}
-
-fn get_default_version() -> anyhow::Result<String> {
-    let config = DuckmanConfig::load()?;
-    if config.default.is_some() {
-        return Ok(config.default.unwrap());
+    if let Ok(path) = which::which("duckdb") {
+        Ok(path)
+    } else {
+        Err(anyhow::anyhow!("duckdb not found"))
     }
-    let versions = config.installed_versions();
-    if let Some(v) = versions.into_iter().next() {
-        return Ok(v);
-    }
-    anyhow::bail!("No DuckDB version installed. Run `duckman install <version>` first.")
-}
-
-fn extensions_dir(version: &str) -> PathBuf {
-    DuckmanConfig::home_dir()
-        .join("extensions")
-        .join(version)
-        .join(platform_ext_id())
-}
-
-fn extension_path(version: &str, name: &str) -> PathBuf {
-    extensions_dir(version).join(format!("{}.duckdb_extension", name))
 }
 
 // ── list ─────────────────────────────────────────────────────────────────────
@@ -112,7 +69,7 @@ pub fn list_extensions(remote: bool) -> anyhow::Result<()> {
 }
 
 fn list_local_extensions() -> anyhow::Result<()> {
-    let duckdb = find_duckdb_binary(None)?;
+    let duckdb = find_duckdb_binary()?;
     let output = Command::new(&duckdb)
         .args([
             "-c",
@@ -164,7 +121,7 @@ fn list_remote_extensions() -> anyhow::Result<()> {
 // ── install ───────────────────────────────────────────────────────────────────
 
 pub async fn install_extension(duckdb_version: Option<&str>, name: &str) -> anyhow::Result<()> {
-    let duckdb = find_duckdb_binary(duckdb_version)?;
+    let duckdb = find_duckdb_binary()?;
     let sql = if DUCKDB_CORE_EXTENSIONS.contains(&name) {
         format!("install {}", name)
     } else {
@@ -192,8 +149,12 @@ pub async fn install_extension(duckdb_version: Option<&str>, name: &str) -> anyh
 // ── uninstall ─────────────────────────────────────────────────────────────────
 
 pub fn uninstall_extension(name: &str) -> anyhow::Result<()> {
-    let version = get_default_version()?;
-    let path = extension_path(&version, name);
+    let config = DuckmanConfig::load()?;
+    let version = config.get_duckdb_version();
+    if version.is_none() {
+        anyhow::bail!("No duckdb version found!");
+    }
+    let path = DuckmanConfig::extension_path(&version.unwrap(), name);
     if !path.exists() {
         anyhow::bail!(
             "Extension '{}' is not installed (looked at {})",
@@ -209,7 +170,7 @@ pub fn uninstall_extension(name: &str) -> anyhow::Result<()> {
 // ── update ────────────────────────────────────────────────────────────────────
 
 pub fn update_extensions() -> anyhow::Result<()> {
-    let duckdb = find_duckdb_binary(None)?;
+    let duckdb = find_duckdb_binary()?;
     let output = Command::new(&duckdb)
         .args(["-c", "UPDATE EXTENSIONS"])
         .output();
