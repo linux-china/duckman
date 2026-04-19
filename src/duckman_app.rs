@@ -28,7 +28,7 @@ pub fn build_duckman_app() -> Command {
                 .num_args(1..),
         );
     let list_command = Command::new("list")
-        .about("list DuckDB versions")
+        .about("list installed/remote DuckDB versions")
         .arg(
             Arg::new("local")
                 .long("local")
@@ -66,12 +66,14 @@ pub fn build_duckman_app() -> Command {
                 .required(true),
         );
     // extension manager (ext)
-    let ext_list = Command::new("list").about("List extensions").arg(
-        Arg::new("remote")
-            .long("remote")
-            .help("List available core and community extensions")
-            .action(ArgAction::SetTrue),
-    );
+    let ext_list = Command::new("list")
+        .about("List installed/remote extensions")
+        .arg(
+            Arg::new("remote")
+                .long("remote")
+                .help("List available core and community extensions")
+                .action(ArgAction::SetTrue),
+        );
     let ext_install = Command::new("install").about("Install an extension").arg(
         Arg::new("name")
             .help("Extension name")
