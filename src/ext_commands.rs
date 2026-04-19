@@ -1,43 +1,11 @@
-use crate::duckman_config::DuckmanConfig;
+use crate::duckman_config::{
+    COMMUNITY_EXTENSIONS_CSV, CORE_EXTENSIONS_CSV, DUCKDB_CORE_EXTENSIONS, DuckmanConfig,
+};
 use colored::Colorize;
 use futures_util::StreamExt;
 use std::path::PathBuf;
 use std::process::Command;
 use std::{env, fs};
-
-const CORE_EXTENSIONS_CSV: &str = include_str!("resources/core_extensions.csv");
-const COMMUNITY_EXTENSIONS_CSV: &str = include_str!("resources/community_extensions.csv");
-
-const DUCKDB_CORE_EXTENSIONS: [&str; 28] = [
-    "autocomplete",
-    "avro",
-    "aws",
-    "azure",
-    "delta",
-    "ducklake",
-    "encodings",
-    "excel",
-    "fts",
-    "httpfs",
-    "iceberg",
-    "icu",
-    "inet",
-    "jemalloc",
-    "json",
-    "lance",
-    "motherduck",
-    "mysql",
-    "parquet",
-    "postgres",
-    "spatial",
-    "sqlite",
-    "tpcds",
-    "tpch",
-    "unity_catalog",
-    "ui",
-    "vortex",
-    "vss",
-];
 
 // Platform identifier used in the extensions URL and install pat
 fn find_duckdb_binary() -> anyhow::Result<PathBuf> {
