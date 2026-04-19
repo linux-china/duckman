@@ -58,7 +58,7 @@ pub fn duckman_home_dir() -> PathBuf {
         .join(".duckdb")
 }
 
-/// Top-level structure of ~/.duckdb/duckman.toml
+/// Top-level structure of ~/.duckdb/duckman-example.toml
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct DuckmanConfig {
     #[serde(default)]
@@ -141,7 +141,7 @@ impl DuckmanConfig {
     }
 
     pub fn config_file() -> PathBuf {
-        Self::home_dir().join("duckman.toml")
+        Self::home_dir().join("../duckman-example.toml")
     }
 
     pub fn installed_versions() -> Vec<String> {
@@ -418,13 +418,13 @@ mod tests {
 
     #[test]
     fn test_load_from() -> TestResult {
-        let config = DuckmanConfig::load_from("duckman.toml")?;
+        let config = DuckmanConfig::load_from("../duckman-example.toml")?;
         Ok(())
     }
 
     #[test]
     fn test_load_profiles() -> TestResult {
-        let config = DuckmanConfig::load_from("duckman.toml")?;
+        let config = DuckmanConfig::load_from("../duckman-example.toml")?;
         for entry in config.get_profiles() {
             println!("{}", entry.0);
             println!("{:?}", entry.1);
@@ -434,7 +434,7 @@ mod tests {
 
     #[test]
     fn test_secrets() -> TestResult {
-        let config = DuckmanConfig::load_from("duckman.toml")?;
+        let config = DuckmanConfig::load_from("../duckman-example.toml")?;
         let default_profile = config.get_profiles().get("default").unwrap();
         for (key, value) in default_profile.secret.iter() {
             println!("{}", key);
@@ -445,7 +445,7 @@ mod tests {
 
     #[test]
     fn test_buckets() -> TestResult {
-        let config = DuckmanConfig::load_from("duckman.toml")?;
+        let config = DuckmanConfig::load_from("../duckman-example.toml")?;
         let default_profile = config.get_profiles().get("default").unwrap();
         for (key, value) in default_profile.bucket.iter() {
             println!("{}", key);
