@@ -53,6 +53,23 @@ Fore more information about profile, please refer [Duckman Config](duckman-confi
 - profile default: `duckdb_version` in profile
 - global default: `default` in config file
 
+Or you can create `.env` file with environment variables:
+
+```
+DUCKDB_VERSION=v1.5.2
+```
+
+### How does Duckman choose profile?
+
+- option first: `--profile xxx`
+- environment variable: `DUCKDB_PROFILE`
+
+Or you can create `.env` file with environment variables:
+
+```
+DUCKDB_PROFILE=xxx
+```
+
 ### How to add MontherDuck support?
 
 ```toml
