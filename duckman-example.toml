@@ -1,0 +1,40 @@
+default = "v1.5.2"
+
+# profile of default
+[profile.default]
+description = "Default profile for duckdb"
+
+# secret
+[profile.default.secret.hf]
+type = "http"
+BEARER_TOKEN = "xxx"
+VERIFY_SSL = 0
+EXTRA_HTTP_HEADERS = { "X-Custom-Header" = "value" }
+
+[profile.default.secret.rest]
+sql = '''
+CREATE SECRET http_auth (
+    TYPE http,
+    BEARER_TOKEN 'token'
+);
+'''
+
+# bucket
+[profile.default.bucket.s3mock]
+type = "s3"
+KEY_ID = 'my_secret_key1'
+SECRET = 'my_secret_value1'
+SCOPE = 's3://my-bucket'
+
+# profile of polyglot
+[profile.polyglot]
+description = "Add different files support"
+duckdb_version = "v1.5.2"
+extensions = ["parquet", "excel"]
+
+[profile.polyglot.environment]
+nick = "Jackie"
+
+[profile.polyglot.attached.mydb]
+endpoint = "host=localhost user=root port=0 database=mysql"
+type = "mysql"
