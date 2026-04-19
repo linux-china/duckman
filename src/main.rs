@@ -78,10 +78,10 @@ async fn main() -> anyhow::Result<()> {
 }
 
 fn get_sub_command() -> Option<String> {
-    let mut raw_args: Vec<OsString> = env::args_os().collect();
+    let raw_args: Vec<OsString> = env::args_os().collect();
     // get sub command name
     let mut sub_command_name = "".to_owned();
-    if (raw_args.len() > 1) {
+    if raw_args.len() > 1 {
         let arg_1 = raw_args[1].clone().to_str().unwrap().to_owned();
         if arg_1.starts_with('-') {
             if raw_args.len() > 3 {
