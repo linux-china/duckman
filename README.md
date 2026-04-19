@@ -10,7 +10,7 @@ Features:
 1. Install/Uninstall DuckDB with different versions
 2. List installed/remote DuckDB
 3. Run duckdb with a specific version of DuckDB and profile
-4. Extension Manager
+4. Extension Manager: install/uninstall/update/migrate extensions
 5. Profile Manager: secrets, S3, required extensions etc.
 6. MotherDuck integration
 7. DuckLake integration
