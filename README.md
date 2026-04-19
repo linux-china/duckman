@@ -70,6 +70,15 @@ Or you can create `.env` file with environment variables:
 DUCKDB_PROFILE=xxx
 ```
 
+### What is Duckman shim?
+
+Duckman shim is a wrapper for DuckDB executable, it is used to switch DuckDB version and profile.
+
+```
+$ ln -s /path/to/duckman.shim ~/bin/duckdb
+$ ~/bin/duckdb --version
+```
+
 ### How to add MontherDuck support?
 
 ```toml
