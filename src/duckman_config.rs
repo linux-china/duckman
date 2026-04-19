@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[cfg(unix)]
 fn binary_name() -> &'static str {
@@ -112,7 +112,11 @@ impl DuckmanConfig {
 
     pub fn load() -> anyhow::Result<Self> {
         let config_file = Self::config_file();
-        if config_file.exists() {
+        Self::load_from(config_file)
+    }
+
+    pub fn load_from<P: AsRef<Path>>(config_file: P) -> anyhow::Result<Self> {
+        if config_file.as_ref().exists() {
             let content = fs::read_to_string(&config_file)?;
             Ok(toml::from_str(&content)?)
         } else {
@@ -174,8 +178,8 @@ mod tests {
     use testresult::TestResult;
 
     #[test]
-    fn test_load() -> TestResult {
-        let config = DuckmanConfig::load()?;
+    fn test_load_from() -> TestResult {
+        let config = DuckmanConfig::load_from("duckman.toml")?;
         Ok(())
     }
 }
