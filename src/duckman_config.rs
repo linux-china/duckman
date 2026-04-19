@@ -181,6 +181,25 @@ pub fn convert_secret_to_sql(name: &str, secret_value: &toml::Table) -> String {
     sql
 }
 
+pub fn convert_bucket_to_sql(name: &str, bucket: &toml::Table) -> String {
+    if let Some(sql) = bucket.get("sql") {
+        // replace \n with space and convert to one-line string
+        return sql.as_str().unwrap().trim().replace('\n', " ");
+    }
+    let mut sql = format!("CREATE create {} (", name);
+    for (key, value) in bucket {
+        let mut value = convert_toml_value_to_sql_value(value);
+        if key.eq_ignore_ascii_case("type") {
+            value = value.trim_matches('\'').to_string();
+        }
+        sql.push_str(&format!(" {} {},", key, value));
+    }
+    sql.remove(sql.len() - 1);
+    //sql = sql[0..sql.len() - 2].to_string();
+    sql.push_str(");");
+    sql
+}
+
 fn convert_toml_value_to_sql_value(value: &toml::Value) -> String {
     match value {
         Value::String(s) => {
@@ -234,6 +253,17 @@ mod tests {
         for (key, value) in default_profile.secret.iter() {
             println!("{}", key);
             println!("sql: {:?}", convert_secret_to_sql("hello", value));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_buckets() -> TestResult {
+        let config = DuckmanConfig::load_from("duckman.toml")?;
+        let default_profile = config.get_profiles().get("default").unwrap();
+        for (key, value) in default_profile.bucket.iter() {
+            println!("{}", key);
+            println!("sql: {:?}", convert_bucket_to_sql(key, value));
         }
         Ok(())
     }
