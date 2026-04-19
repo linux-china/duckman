@@ -57,7 +57,7 @@ pub fn build_duckman_app() -> Command {
                 .help("DuckDB version as default")
                 .index(1)
                 .num_args(1)
-                .required(true),
+                .required(false),
         );
     // extension manager (ext)
     let ext_list = Command::new("list")
