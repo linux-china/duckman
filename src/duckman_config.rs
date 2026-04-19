@@ -92,11 +92,18 @@ impl DuckmanConfig {
     }
 
     pub fn version_dir(version: &str) -> PathBuf {
-        Self::versions_dir().join(version)
+        Self::versions_dir().join(normalize_duckdb_version(version))
     }
 
     pub fn version_binary(version: &str) -> PathBuf {
         Self::version_dir(version).join(binary_name())
+    }
+
+    fn extension_dir(duckdb_version: &str, ext_name: &str) -> PathBuf {
+        DuckmanConfig::version_dir(duckdb_version)
+            .join("extensions")
+            .join(duckdb_platform_id())
+            .join(format!("{}.duckdb_extension", ext_name))
     }
 
     pub fn config_file() -> PathBuf {
@@ -312,6 +319,21 @@ pub fn normalize_duckdb_version(version: &str) -> String {
     }
 }
 
+fn duckdb_platform_id() -> &'static str {
+    if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
+        "osx_arm64"
+    } else if cfg!(target_os = "macos") {
+        "osx_amd64"
+    } else if cfg!(target_os = "linux") && cfg!(target_arch = "aarch64") {
+        "linux_arm64"
+    } else if cfg!(target_os = "linux") {
+        "linux_amd64"
+    } else if cfg!(target_os = "windows") {
+        "windows_amd64"
+    } else {
+        "linux_amd64"
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
