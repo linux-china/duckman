@@ -44,11 +44,11 @@ pub struct Profile {
     #[serde(default)]
     pub secret: HashMap<String, toml::Table>,
     #[serde(default)]
-    pub s3_buckets: Vec<S3Bucket>,
+    pub bucket: HashMap<String, toml::Table>,
     #[serde(default)]
-    pub attached: Vec<AttachedDb>,
+    pub attached: HashMap<String, AttachedDb>,
     #[serde(default)]
-    pub ducklakes: Vec<DuckLake>,
+    pub ducklake: HashMap<String, DuckLake>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -66,17 +66,7 @@ pub struct Secret {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct S3Bucket {
-    pub name: String,
-    pub access_key: String,
-    pub secret_key: String,
-    pub endpoint: Option<String>,
-    pub region: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
 pub struct AttachedDb {
-    pub name: String,
     #[serde(rename = "type")]
     pub db_type: String,
     pub endpoint: String,
@@ -85,7 +75,6 @@ pub struct AttachedDb {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DuckLake {
-    pub name: String,
     pub catalog_endpoint: String,
     pub data_path: String,
 }
