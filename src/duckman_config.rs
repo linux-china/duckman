@@ -68,7 +68,7 @@ pub struct Secret {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AttachedDb {
     #[serde(rename = "type")]
-    pub db_type: String,
+    pub db_type: Option<String>,
     pub endpoint: String,
     pub encryption_key: Option<String>,
     pub sql: Option<String>,
@@ -207,10 +207,15 @@ pub fn convert_attached_db_to_sql(name: &str, db: &AttachedDb) -> String {
         // replace \n with space and convert to one-line string
         return sql.trim().replace('\n', " ");
     }
-    format!(
-        "ATTACH '{}' AS {} ( type {});",
-        db.endpoint, name, db.db_type
-    )
+    if let Some(db_type) = &db.db_type {
+        format!(
+            "ATTACH '{}' AS {} ( type {});",
+            db.endpoint, name, db_type
+        )
+    } else {
+        // such as motherduck, `md:xxx`
+        format!("ATTACH '{}' AS {};", db.endpoint, name)
+    }
 }
 
 pub fn convert_ducklake_to_sql(name: &str, db: &DuckLake) -> String {
