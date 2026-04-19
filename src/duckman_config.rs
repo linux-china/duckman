@@ -141,7 +141,7 @@ impl DuckmanConfig {
     }
 
     pub fn config_file() -> PathBuf {
-        Self::home_dir().join("../duckman-example.toml")
+        Self::home_dir().join("duckman.toml")
     }
 
     pub fn installed_versions() -> Vec<String> {
