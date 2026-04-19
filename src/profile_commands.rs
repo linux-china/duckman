@@ -51,8 +51,17 @@ pub fn list_profiles() -> anyhow::Result<()> {
                 .secrets
                 .iter()
                 .map(|s| {
-                    let label = s.name.as_deref().unwrap_or("(unnamed)");
-                    format!("{} [{}]", label, s.secret_type)
+                    let label = if let Some(name) = s.get("name") {
+                        name.as_str().unwrap().to_string()
+                    } else {
+                        "(unnamed)".to_owned()
+                    };
+                    let secret_type = if let Some(name) = s.get("type") {
+                        name.as_str().unwrap().to_string()
+                    } else {
+                        "(unknown)".to_owned()
+                    };
+                    format!("{} [{}]", label, secret_type)
                 })
                 .collect();
             println!("    secrets:     {}", labels.join(", "));
