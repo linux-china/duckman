@@ -1,3 +1,4 @@
+use crate::commands::completion_command;
 use crate::duckman_app::build_duckman_app;
 use std::env;
 use std::ffi::OsString;
@@ -65,9 +66,8 @@ async fn main() -> anyhow::Result<()> {
             Some(("list", _)) => profile_commands::list_profiles()?,
             _ => unreachable!(),
         },
-        Some(("completion", _m)) => {
-            // TODO: implement shell completion generation
-            println!("Completion generation not yet implemented.");
+        Some(("completion", sub_command_matches)) => {
+            completion_command(sub_command_matches);
         }
         _ => {
             build_duckman_app().print_help()?;

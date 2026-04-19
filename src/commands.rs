@@ -1,10 +1,14 @@
+use crate::duckman_app::build_duckman_app;
 use crate::duckman_config::DuckmanConfig;
 use crate::github;
+use clap::ArgMatches;
+use clap_complete::Shell::{Bash, Fish, PowerShell, Zsh};
+use clap_complete::{Shell, generate};
 use colored::Colorize;
 use futures_util::StreamExt;
 use indicatif::{ProgressBar, ProgressStyle};
 use std::fs;
-use std::io::Cursor;
+use std::io::{Cursor, stdout};
 
 const DUCKDB_VERSIONS_CSV: &str = include_str!("resources/duckdb_versions.csv");
 
@@ -286,6 +290,29 @@ pub fn set_default_version(version: &str) -> anyhow::Result<()> {
     config.save()?;
     println!("Default DuckDB version set to {}.", version.green());
     Ok(())
+}
+
+pub fn completion_command(command_matches: &ArgMatches) {
+    let shell_name = command_matches
+        .get_one::<String>("shell")
+        .map(|s| s.to_string())
+        .unwrap_or_else(|| Shell::from_env().unwrap_or(Bash).to_string())
+        .to_lowercase();
+    let mut cmd = build_duckman_app();
+    if shell_name == "bash" {
+        generate(Bash, &mut cmd, "dotenvx", &mut stdout());
+    } else if shell_name == "zsh" {
+        generate(Zsh, &mut cmd, "dotenvx", &mut stdout());
+    } else if shell_name == "fish" {
+        generate(Fish, &mut cmd, "dotenvx", &mut stdout());
+    } else if shell_name == "powershell" || shell_name == "pwsh" {
+        generate(PowerShell, &mut cmd, "dotenvx", &mut stdout());
+    } else {
+        eprintln!(
+            "Unsupported shell: {shell_name}. Supported shells are bash/zsh/fish/powershell."
+        );
+        std::process::exit(1);
+    }
 }
 
 #[cfg(test)]
