@@ -40,7 +40,7 @@ pub fn list_profiles() -> anyhow::Result<()> {
             let vars: Vec<String> = profile
                 .environment
                 .iter()
-                .map(|(k, v)| format!("{}={}", k, v))
+                .map(|(k, v)| format!("{}={}", k.to_uppercase(), v))
                 .collect();
             println!("    env:         {}", vars.join("  "));
         }
