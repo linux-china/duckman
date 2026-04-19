@@ -38,6 +38,7 @@ futures-util = { version = "0.3", default-features = false, features = ["std"] }
 toml = "1.1.2+spec-1.1.0"
 lazy_static = "1.5.0"
 which = "8"
+dotenvy = "0.15.7"
 
 [dev-dependencies]
 testresult = "0.4.1"
