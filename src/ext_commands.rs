@@ -46,7 +46,7 @@ fn list_local_extensions() -> anyhow::Result<()> {
     let output = Command::new(&duckdb)
         .args([
             "-c",
-            "select extension_name, installed, description FROM duckdb_extensions() where installed = true",
+            "select extension_name, installed, loaded, description FROM duckdb_extensions() where installed = true",
         ])
         .output();
     match output {
