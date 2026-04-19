@@ -1,5 +1,6 @@
+use crate::runner::duckdb_execute;
 use crate::duckman_app::build_duckman_app;
-use crate::duckman_config::{DuckmanConfig, Profile};
+use crate::duckman_config::{DuckmanConfig, inject_profile, normalize_duckdb_version};
 use crate::github;
 use clap::ArgMatches;
 use clap_complete::Shell::{Bash, Fish, PowerShell, Zsh};
@@ -7,7 +8,6 @@ use clap_complete::{Shell, generate};
 use colored::Colorize;
 use futures_util::StreamExt;
 use indicatif::{ProgressBar, ProgressStyle};
-use std::collections::HashMap;
 use std::io::{Cursor, stdout};
 use std::{env, fs};
 
@@ -40,14 +40,6 @@ fn platform_asset_name() -> &'static str {
         "duckdb_cli-windows-amd64.zip"
     } else {
         "duckdb_cli-linux-amd64.zip"
-    }
-}
-
-fn normalize_version(version: &str) -> String {
-    if version.starts_with('v') {
-        version.to_string()
-    } else {
-        format!("v{}", version)
     }
 }
 
@@ -96,7 +88,7 @@ pub async fn list_versions(local: bool, remote: bool) -> anyhow::Result<()> {
 }
 
 pub async fn install_version(version: &str) -> anyhow::Result<()> {
-    let version = normalize_version(version);
+    let version = normalize_duckdb_version(version);
     let mut config = DuckmanConfig::load()?;
 
     if config.is_installed(&version) {
@@ -211,7 +203,7 @@ pub async fn install_version(version: &str) -> anyhow::Result<()> {
 }
 
 pub async fn uninstall_version(version: &str) -> anyhow::Result<()> {
-    let version = normalize_version(version);
+    let version = normalize_duckdb_version(version);
     let mut config = DuckmanConfig::load()?;
 
     if !config.is_installed(&version) {
@@ -240,7 +232,7 @@ pub fn run_duckdb(
 
     // Version resolution: explicit arg > DUCKDB_VERSION env > config default
     let duckdb_version = version
-        .map(normalize_version)
+        .map(normalize_duckdb_version)
         .or_else(|| env::var("DUCKDB_VERSION").ok())
         .unwrap_or_else(|| config.default.clone().unwrap_or("".to_string()));
 
@@ -255,77 +247,11 @@ pub fn run_duckdb(
              Run `duckman install <version>` first."
         );
     }
-
-    let binary = DuckmanConfig::version_binary(&duckdb_version);
-    if !binary.exists() {
-        anyhow::bail!(
-            "DuckDB {} is not installed. Run `duckman install {}` first.",
-            duckdb_version,
-            duckdb_version
-        );
-    }
-    // environment variables
-    let mut new_env: HashMap<String, String> = env::vars().collect();
-    let mut new_extra_args = vec![];
-    new_extra_args.extend(extra_args);
-    // profiles
-    let profiles = config.get_profiles();
-    if !profiles.is_empty() {
-        // default profile check
-        if let Some(default_profile) = profiles.get("default") {
-            println!("Using default profile: {}", "default");
-            inject_profile(default_profile, &mut new_extra_args, &mut new_env)
-        }
-        if let Some(profile_name) = duckdb_profile {
-            if let Some(profile) = profiles.get(&profile_name) {
-                println!("Using profile: {}", profile_name);
-                inject_profile(profile, &mut new_extra_args, &mut new_env)
-            }
-        }
-    }
-
-    // On Unix: replace this process with duckdb — stdin/stdout/stderr are
-    // inherited automatically, so pipes work transparently.
-    #[cfg(unix)]
-    {
-        use std::os::unix::process::CommandExt;
-        let err = std::process::Command::new(&binary)
-            .args(&new_extra_args)
-            .envs(&new_env)
-            .exec();
-        anyhow::bail!("Failed to exec {}: {}", binary.display(), err);
-    }
-
-    // On Windows: spawn and forward the exit code.
-    #[cfg(not(unix))]
-    {
-        let status = std::process::Command::new(&binary)
-            .args(&extra_args)
-            .envs(&new_extra_args)
-            .status()?;
-        std::process::exit(status.code().unwrap_or(1));
-    }
-}
-
-fn inject_profile(
-    profile: &Profile,
-    args: &mut Vec<String>,
-    new_env: &mut HashMap<String, String>,
-) {
-    // environment variable
-    if !profile.environment.is_empty() {
-        new_env.extend(
-            profile
-                .environment
-                .clone()
-                .iter()
-                .map(|(k, v)| (k.to_uppercase(), v.to_string())),
-        );
-    }
+    duckdb_execute(&config, &duckdb_version, &duckdb_profile, extra_args)
 }
 
 pub fn set_default_version(version: &str) -> anyhow::Result<()> {
-    let version = normalize_version(version);
+    let version = normalize_duckdb_version(version);
     let mut config = DuckmanConfig::load()?;
 
     if !config.is_installed(&version) {
