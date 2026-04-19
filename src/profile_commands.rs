@@ -78,7 +78,7 @@ pub fn list_profiles() -> anyhow::Result<()> {
                 println!(
                     "    attached:    {} [{}] {}",
                     name,
-                    db.db_type,
+                    db.db_type.clone().unwrap_or("".to_string()),
                     db.endpoint.dimmed()
                 );
             }
