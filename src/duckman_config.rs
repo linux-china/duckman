@@ -37,6 +37,7 @@ pub struct DuckmanConfig {
 pub struct Profile {
     pub description: Option<String>,
     pub duckdb_version: Option<String>,
+    pub parquet_key: Option<String>,
     #[serde(default)]
     pub extensions: Vec<String>,
     #[serde(default)]
@@ -169,7 +170,7 @@ pub fn convert_secret_to_sql(name: &str, secret_value: &toml::Table) -> String {
         // replace \n with space and convert to one-line string
         return sql.as_str().unwrap().trim().replace('\n', " ");
     }
-    let mut sql = format!("CREATE SECRET {} (", name);
+    let mut sql = format!("CREATE OR REPLACE SECRET {} (", name);
     for (key, value) in secret_value {
         sql.push_str(&format!(
             " {} {},",
@@ -188,7 +189,7 @@ pub fn convert_bucket_to_sql(name: &str, bucket: &toml::Table) -> String {
         // replace \n with space and convert to one-line string
         return sql.as_str().unwrap().trim().replace('\n', " ");
     }
-    let mut sql = format!("CREATE create {} (", name);
+    let mut sql = format!("CREATE OR REPLACE SECRET {} (", name);
     for (key, value) in bucket {
         let mut value = convert_toml_value_to_sql_value(value);
         if key.eq_ignore_ascii_case("type") {
@@ -207,11 +208,13 @@ pub fn convert_attached_db_to_sql(name: &str, db: &AttachedDb) -> String {
         // replace \n with space and convert to one-line string
         return sql.trim().replace('\n', " ");
     }
-    if let Some(db_type) = &db.db_type {
+    if let Some(encryption_key) = &db.encryption_key {
         format!(
-            "ATTACH '{}' AS {} ( type {});",
-            db.endpoint, name, db_type
+            "ATTACH '{}' AS {} ( ENCRYPTION_KEY '{}');",
+            db.endpoint, name, encryption_key
         )
+    } else if let Some(db_type) = &db.db_type {
+        format!("ATTACH '{}' AS {} ( type {});", db.endpoint, name, db_type)
     } else {
         // such as motherduck, `md:xxx`
         format!("ATTACH '{}' AS {};", db.endpoint, name)
