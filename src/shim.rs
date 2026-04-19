@@ -8,7 +8,7 @@ mod duckman_config;
 mod runner;
 
 fn main() -> anyhow::Result<()> {
-    dotenvy::dotenv()?;
+    dotenvy::dotenv().ok();
     let mut raw_args: Vec<OsString> = env::args_os().collect();
     // get shim command name
     let shim_command = raw_args[0].clone().to_str().unwrap().to_owned();

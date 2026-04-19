@@ -14,7 +14,7 @@ mod runner;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenvy::dotenv()?;
+    dotenvy::dotenv().ok();
     let matches = build_duckman_app().get_matches();
 
     // inject global duckdb version
