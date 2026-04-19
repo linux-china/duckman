@@ -60,6 +60,14 @@ Or you can create `.env` file with environment variables:
 DUCKDB_VERSION=v1.5.2
 ```
 
+### How to migrate extensions from DuckDB v1.4.4 to v1.5.2?
+
+Migration is not real one, just install the extensions on new DuckDB version.
+
+```shell
+$ duckman --duckdb 1.5.2 ext migrate 1.4.4
+```
+
 ### How does Duckman choose profile?
 
 - option first: `--profile xxx`
