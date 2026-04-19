@@ -139,7 +139,7 @@ pub async fn install_version(version: &str) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
     let response = client
         .get(&asset.browser_download_url)
-        .header("User-Agent", "duckman/0.1.0")
+        .header("User-Agent", "Duckman/0.1.0")
         .send()
         .await?;
 
@@ -286,4 +286,16 @@ pub fn set_default_version(version: &str) -> anyhow::Result<()> {
     config.save()?;
     println!("Default DuckDB version set to {}.", version.green());
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use testresult::TestResult;
+
+    #[tokio::test]
+    async fn test_install_version() -> TestResult {
+        install_version("v1.3.2").await?;
+        Ok(())
+    }
 }
