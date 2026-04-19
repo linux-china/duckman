@@ -11,13 +11,10 @@ fn main() -> anyhow::Result<()> {
     let mut raw_args: Vec<OsString> = env::args_os().collect();
     // get shim command name
     let shim_command = raw_args[0].clone().to_str().unwrap().to_owned();
-    let config = DuckmanConfig::load().unwrap();
-    let duckdb_version = env::var("DUCKDB_VERSION")
-        .ok()
-        .unwrap_or_else(|| config.default.clone().unwrap_or("".to_string()));
+    let config = DuckmanConfig::load()?;
     let duckdb_profile = env::var("DUCKDB_PROFILE").ok();
-
-    if duckdb_version.is_empty() {
+    let duckdb_version = config.get_duckdb_version(&duckdb_profile);
+    if duckdb_version.is_none() {
         bail!(
             "No DuckDB version specified and no default set. \
              Run `duckman install <version>` first."
@@ -28,5 +25,10 @@ fn main() -> anyhow::Result<()> {
         .skip(1)
         .map(|os| os.to_str().unwrap().to_owned())
         .collect();
-    duckdb_execute(&config, &duckdb_version, &duckdb_profile, extra_args)
+    duckdb_execute(
+        &config,
+        &duckdb_version.unwrap(),
+        &duckdb_profile,
+        extra_args,
+    )
 }

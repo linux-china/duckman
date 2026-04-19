@@ -190,9 +190,18 @@ impl DuckmanConfig {
         }
     }
 
-    pub fn get_duckdb_version(&self) -> Option<String> {
+    pub fn get_duckdb_version(&self, profile_name: &Option<String>) -> Option<String> {
         if let Ok(version) = env::var("DUCKDB_VERSION") {
             return Some(version);
+        }
+        if let Some(profile_name) = profile_name {
+            if let Some(profiles) = &self.profile {
+                if let Some(selected_profile) = profiles.get(profile_name) {
+                    if let Some(profile_duckdb_version) = &selected_profile.duckdb_version {
+                        Some(profile_duckdb_version.to_string());
+                    }
+                }
+            }
         }
         if self.default.is_some() {
             return Some(self.default.clone().unwrap());

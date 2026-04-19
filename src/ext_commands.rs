@@ -15,7 +15,7 @@ fn find_duckdb_binary() -> anyhow::Result<PathBuf> {
     }
     // load default from config
     let config = DuckmanConfig::load()?;
-    if let Some(duckdb_version) = config.get_duckdb_version() {
+    if let Some(duckdb_version) = config.get_duckdb_version(&None) {
         return Ok(DuckmanConfig::version_binary(&duckdb_version));
     }
     // Fall back to duckdb in PATH
@@ -100,7 +100,7 @@ pub async fn install_extension(duckdb_version: Option<&str>, name: &str) -> anyh
         Ok(out) => {
             if out.status.success() {
                 let output = String::from_utf8_lossy(&out.stdout);
-                if (!output.trim().is_empty()) {
+                if !output.trim().is_empty() {
                     println!("{}", output);
                 } else {
                     println!("Installed extension {}", name.green(),);
@@ -118,7 +118,7 @@ pub async fn install_extension(duckdb_version: Option<&str>, name: &str) -> anyh
 
 pub fn uninstall_extension(name: &str) -> anyhow::Result<()> {
     let config = DuckmanConfig::load()?;
-    let version = config.get_duckdb_version();
+    let version = config.get_duckdb_version(&None);
     if version.is_none() {
         anyhow::bail!("No duckdb version found!");
     }

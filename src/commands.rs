@@ -222,31 +222,27 @@ pub async fn uninstall_version(version: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn run_duckdb(
-    version: Option<&str>,
-    profile: Option<&str>,
-    extra_args: Vec<String>,
-) -> anyhow::Result<()> {
+pub fn run_duckdb(profile: Option<&str>, extra_args: Vec<String>) -> anyhow::Result<()> {
     let config = DuckmanConfig::load()?;
-
-    // Version resolution: explicit arg > DUCKDB_VERSION env > config default
-    let duckdb_version = version
-        .map(normalize_duckdb_version)
-        .or_else(|| env::var("DUCKDB_VERSION").ok())
-        .unwrap_or_else(|| config.default.clone().unwrap_or("".to_string()));
 
     // Version resolution: explicit arg > DUCKDB_VERSION env > config default
     let duckdb_profile = profile
         .map(|p| p.to_string())
         .or_else(|| env::var("DUCKDB_PROFILE").ok());
+    let duckdb_version = config.get_duckdb_version(&duckdb_profile);
 
-    if duckdb_version.is_empty() {
+    if duckdb_version.is_none() {
         anyhow::bail!(
             "No DuckDB version specified and no default set. \
              Run `duckman install <version>` first."
         );
     }
-    duckdb_execute(&config, &duckdb_version, &duckdb_profile, extra_args)
+    duckdb_execute(
+        &config,
+        &duckdb_version.unwrap(),
+        &duckdb_profile,
+        extra_args,
+    )
 }
 
 pub fn set_default_version(version: &str) -> anyhow::Result<()> {

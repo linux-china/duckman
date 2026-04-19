@@ -13,14 +13,8 @@ pub fn build_duckman_app() -> Command {
                 .required(false),
         )
         .arg(
-            Arg::new("version")
-                .help("DuckDB version to run (default: $DUCKDB_VERSION or configured default)")
-                .index(1)
-                .required(false),
-        )
-        .arg(
             Arg::new("extras")
-                .index(2)
+                .index(1)
                 .help("DuckDB options after '--' hyphen")
                 .last(true)
                 .allow_hyphen_values(true)

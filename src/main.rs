@@ -37,7 +37,6 @@ async fn main() -> anyhow::Result<()> {
             commands::uninstall_version(version).await?;
         }
         Some(("run", m)) => {
-            let version = m.get_one::<String>("version").map(|s| s.as_str());
             let profile = m.get_one::<String>("profile").map(|s| s.as_str());
             // Collect everything after `--` from the raw process args
             let raw: Vec<String> = env::args().collect();
@@ -47,7 +46,7 @@ async fn main() -> anyhow::Result<()> {
                 .skip(1)
                 .cloned()
                 .collect();
-            commands::run_duckdb(version, profile, extra_args)?;
+            commands::run_duckdb(profile, extra_args)?;
         }
         Some(("default", m)) => {
             let version = m.get_one::<String>("version").unwrap();
