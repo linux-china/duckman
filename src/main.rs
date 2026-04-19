@@ -78,6 +78,10 @@ async fn main() -> anyhow::Result<()> {
             Some(("update", _)) => {
                 ext_commands::update_extensions()?;
             }
+            Some(("migrate", sm)) => {
+                let version = sm.get_one::<String>("version").unwrap();
+                ext_commands::migrate_extensions(version)?;
+            }
             _ => unreachable!(),
         },
         Some(("profile", m)) => match m.subcommand() {

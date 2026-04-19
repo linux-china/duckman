@@ -1,8 +1,10 @@
 use crate::duckman_config::{
     COMMUNITY_EXTENSIONS_CSV, CORE_EXTENSIONS_CSV, DUCKDB_CORE_EXTENSIONS, DuckmanConfig,
+    normalize_duckdb_version,
 };
 use colored::Colorize;
 use futures_util::StreamExt;
+use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
 use std::{env, fs};
@@ -144,6 +146,113 @@ pub fn uninstall_extension(name: &str) -> anyhow::Result<()> {
     }
     fs::remove_file(&path)?;
     println!("Uninstalled extension {}.", name.green());
+    Ok(())
+}
+
+// ── migrate ───────────────────────────────────────────────────────────────────
+
+pub fn migrate_extensions(from_version: &str) -> anyhow::Result<()> {
+    let from_version = normalize_duckdb_version(from_version);
+    let old_binary = DuckmanConfig::version_binary(&from_version);
+    if !old_binary.exists() {
+        anyhow::bail!(
+            "DuckDB {} is not installed (binary not found at {})",
+            from_version,
+            old_binary.display()
+        );
+    }
+
+    // Query installed extensions from old version via CSV output (easy to parse)
+    let output = Command::new(&old_binary)
+        .args([
+            "-csv",
+            "-c",
+            "SELECT extension_name FROM duckdb_extensions() WHERE installed = true",
+        ])
+        .output()?;
+
+    if !output.status.success() {
+        anyhow::bail!(
+            "Failed to query extensions from {}: {}",
+            from_version,
+            String::from_utf8_lossy(&output.stderr).trim()
+        );
+    }
+
+    // Parse CSV: first line is header "extension_name", rest are names
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let extensions: Vec<&str> = stdout
+        .lines()
+        .skip(1)
+        .map(|l| l.trim().trim_matches('"'))
+        .filter(|l| !l.is_empty())
+        .collect();
+
+    if extensions.is_empty() {
+        println!("No installed extensions found in DuckDB {}.", from_version);
+        return Ok(());
+    }
+
+    println!(
+        "Extensions installed in DuckDB {}: {}",
+        from_version.yellow(),
+        extensions.join(", ")
+    );
+    println!();
+
+    // Target: current default duckdb
+    let current_binary = find_duckdb_binary()?;
+    let config = DuckmanConfig::load()?;
+    let current_version = config
+        .get_duckdb_version(&None)
+        .unwrap_or_else(|| "current".to_string());
+    println!("Installing into DuckDB {}...", current_version.green());
+
+    let mut ok_count = 0usize;
+    let mut fail_count = 0usize;
+
+    for ext_name in &extensions {
+        let sql = if DUCKDB_CORE_EXTENSIONS.contains(ext_name) {
+            format!("install {}", ext_name)
+        } else {
+            format!("install {} from community", ext_name)
+        };
+
+        print!("  {:.<30} ", ext_name.green());
+        let _ = std::io::stdout().flush();
+
+        match Command::new(&current_binary).args(["-c", &sql]).output() {
+            Ok(out) if out.status.success() => {
+                println!("{}", "ok".green());
+                ok_count += 1;
+            }
+            Ok(out) => {
+                println!("{}", "failed".red());
+                let stderr = String::from_utf8_lossy(&out.stderr);
+                let msg = stderr.lines().next().unwrap_or("").trim();
+                if !msg.is_empty() {
+                    println!("    {}", msg.dimmed());
+                }
+                fail_count += 1;
+            }
+            Err(e) => {
+                println!("{}", "error".red());
+                println!("    {}", e.to_string().dimmed());
+                fail_count += 1;
+            }
+        }
+    }
+
+    println!();
+    println!(
+        "Migration complete: {} installed, {} failed.",
+        ok_count.to_string().green(),
+        if fail_count > 0 {
+            fail_count.to_string().red().to_string()
+        } else {
+            "0".to_string()
+        }
+    );
     Ok(())
 }
 

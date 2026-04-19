@@ -84,6 +84,15 @@ pub fn build_duckman_app() -> Command {
                 .num_args(1)
                 .required(true),
         );
+    let ext_migrate = Command::new("migrate")
+        .about("Migrate extensions from a specific version")
+        .arg(
+            Arg::new("version")
+                .help("DuckDB version to migrate")
+                .index(1)
+                .num_args(1)
+                .required(true),
+        );
     let ext_update = Command::new("update").about("Update all installed extensions");
     let ext_command = Command::new("ext")
         .about("Manage DuckDB extensions")
@@ -91,7 +100,8 @@ pub fn build_duckman_app() -> Command {
         .subcommand(ext_list)
         .subcommand(ext_install)
         .subcommand(ext_uninstall)
-        .subcommand(ext_update);
+        .subcommand(ext_update)
+        .subcommand(ext_migrate);
     // profile manager
     let profile_list = Command::new("list").about("List all profiles");
     let profile_command = Command::new("profile")
