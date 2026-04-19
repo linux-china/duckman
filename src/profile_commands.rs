@@ -46,51 +46,50 @@ pub fn list_profiles() -> anyhow::Result<()> {
         }
 
         // ── secrets ───────────────────────────────────────────────────────────
-        if !profile.secrets.is_empty() {
+        if !profile.secret.is_empty() {
             let labels: Vec<String> = profile
-                .secrets
+                .secret
                 .iter()
-                .map(|s| {
-                    let label = if let Some(name) = s.get("name") {
-                        name.as_str().unwrap().to_string()
-                    } else {
-                        "(unnamed)".to_owned()
-                    };
-                    let secret_type = if let Some(name) = s.get("type") {
+                .map(|(name, value)| {
+                    let secret_type = if let Some(name) = value.get("type") {
                         name.as_str().unwrap().to_string()
                     } else {
                         "(unknown)".to_owned()
                     };
-                    format!("{} [{}]", label, secret_type)
+                    format!("{} [{}]", name, secret_type)
                 })
                 .collect();
             println!("    secrets:     {}", labels.join(", "));
         }
 
-        // ── S3 buckets ────────────────────────────────────────────────────────
-        if !profile.s3_buckets.is_empty() {
-            let names: Vec<&str> = profile.s3_buckets.iter().map(|b| b.name.as_str()).collect();
-            println!("    s3_buckets:  {}", names.join(", "));
+        // ── storage buckets ────────────────────────────────────────────────────────
+        if !profile.bucket.is_empty() {
+            let names: Vec<&str> = profile
+                .bucket
+                .iter()
+                .map(|(name, value)| name.as_str())
+                .collect();
+            println!("    storage buckets:  {}", names.join(", "));
         }
 
         // ── attached DBs ──────────────────────────────────────────────────────
         if !profile.attached.is_empty() {
-            for db in &profile.attached {
+            for (name, db) in &profile.attached {
                 println!(
                     "    attached:    {} [{}] {}",
-                    db.name,
+                    name,
                     db.db_type,
                     db.endpoint.dimmed()
                 );
             }
         }
 
-        // ── ducklakes ─────────────────────────────────────────────────────────
-        if !profile.ducklakes.is_empty() {
-            for lake in &profile.ducklakes {
+        // ── ducklake ─────────────────────────────────────────────────────────
+        if !profile.ducklake.is_empty() {
+            for (name, lake) in &profile.ducklake {
                 println!(
                     "    ducklake:    {} → {}",
-                    lake.name,
+                    name,
                     lake.catalog_endpoint.dimmed()
                 );
             }
