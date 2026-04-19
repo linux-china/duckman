@@ -44,6 +44,13 @@ If profile name is `default`, and it means that this profile will be used as the
 
 # FAQ
 
+### How does Duckman choose DuckDB version?
+
+- option first: `--duckdb 1.5.2`
+- environment variable: `DUCKDB_VERSION`
+- profile default: `duckdb_version` in profile
+- global default: `default` in config file
+
 ### How to add MontherDuck support?
 
 ```toml
