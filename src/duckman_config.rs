@@ -134,8 +134,9 @@ impl DuckmanConfig {
     }
 
     pub fn extension_path(duckdb_version: &str, ext_name: &str) -> PathBuf {
-        DuckmanConfig::version_dir(duckdb_version)
+        DuckmanConfig::home_dir()
             .join("extensions")
+            .join(duckdb_version)
             .join(duckdb_platform_id())
             .join(format!("{}.duckdb_extension", ext_name))
     }
@@ -171,7 +172,8 @@ impl DuckmanConfig {
     }
 
     pub fn is_ext_installed(duckdb_version: &str, ext_name: &str) -> bool {
-        Self::extension_path(duckdb_version, ext_name).exists()
+        let buf = Self::extension_path(duckdb_version, ext_name);
+        buf.exists()
     }
 
     pub fn load() -> anyhow::Result<Self> {
@@ -340,10 +342,10 @@ pub fn inject_profile(
             } else {
                 format!("install {} from community;", ext_name)
             };
-            args.push("-c".to_owned());
+            args.push("-cmd".to_owned());
             args.push(sql);
         } else {
-            args.push("-c".to_owned());
+            args.push("-cmd".to_owned());
             args.push(format!("load {};", ext_name));
         }
     }
@@ -415,6 +417,7 @@ fn duckdb_platform_id() -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::stdout;
     use testresult::TestResult;
 
     #[test]
@@ -458,6 +461,13 @@ mod tests {
 
     #[test]
     fn test_convert_secret_to_sql() -> TestResult {
+        Ok(())
+    }
+
+    #[test]
+    fn test_ext_installed() -> TestResult {
+        let installed = DuckmanConfig::is_ext_installed("v1.5.2", "shellfs");
+        println!("installed: {}", installed);
         Ok(())
     }
 }
