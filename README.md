@@ -14,11 +14,10 @@ Features:
 5. Profile Manager: secrets, S3, required extensions etc.
 6. MotherDuck integration
 7. DuckLake integration
-8. Iceberg integration
 
 ## profiles
 
-name, description, default duckdb version
+Profile is a collection of settings to run DuckDB.
 
 - basic info: name, description, DuckDB version
 - required extensions
@@ -30,6 +29,8 @@ name, description, default duckdb version
 - parquet key
 
 If profile name is `default`, and it means that this profile will be used as the default profile when running DuckDB.
+
+Fore more information about profile, please refer [Duckman Config](duckman-config.md).
 
 # extension sub command
 
