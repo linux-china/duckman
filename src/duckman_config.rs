@@ -41,7 +41,7 @@ pub struct Profile {
     #[serde(default)]
     pub environments: HashMap<String, String>,
     #[serde(default)]
-    pub secrets: Vec<Secret>,
+    pub secrets: Vec<toml::Table>,
     #[serde(default)]
     pub s3_buckets: Vec<S3Bucket>,
     #[serde(default)]
