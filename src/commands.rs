@@ -57,7 +57,7 @@ pub async fn list_versions(local: bool, remote: bool) -> anyhow::Result<()> {
         } else {
             let default_version = config.default.unwrap_or("".to_string());
             for v in &versions {
-                if *v == default_version {
+                if v == &default_version {
                     println!("  {} {}", v.green(), "(default)".dimmed());
                 } else {
                     println!("  {}", v);
