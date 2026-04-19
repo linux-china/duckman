@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+use toml::Value;
 
 #[cfg(unix)]
 fn binary_name() -> &'static str {
@@ -41,7 +42,7 @@ pub struct Profile {
     #[serde(default)]
     pub environments: HashMap<String, String>,
     #[serde(default)]
-    pub secrets: Vec<toml::Table>,
+    pub secret: HashMap<String, toml::Table>,
     #[serde(default)]
     pub s3_buckets: Vec<S3Bucket>,
     #[serde(default)]
@@ -172,6 +173,50 @@ impl DuckmanConfig {
     }
 }
 
+pub fn convert_secret_to_sql(name: &str, secret_value: &toml::Table) -> String {
+    if let Some(sql) = secret_value.get("sql") {
+        // replace \n with space and convert to one-line string
+        return sql.as_str().unwrap().trim().replace('\n', " ");
+    }
+    let mut sql = format!("CREATE SECRET {} (", name);
+    for (key, value) in secret_value {
+        sql.push_str(&format!(
+            " {} {},",
+            key,
+            convert_toml_value_to_sql_value(value)
+        ));
+    }
+    sql.remove(sql.len() - 1);
+    //sql = sql[0..sql.len() - 2].to_string();
+    sql.push_str(");");
+    sql
+}
+
+fn convert_toml_value_to_sql_value(value: &toml::Value) -> String {
+    match value {
+        Value::String(s) => {
+            format!("'{}\'", s.as_str())
+        }
+        Value::Integer(i) => i.to_string(),
+        Value::Float(f) => f.to_string(),
+        Value::Boolean(b) => b.to_string(),
+        Value::Datetime(d) => d.to_string(),
+        Value::Array(a) => a
+            .iter()
+            .map(|v| convert_toml_value_to_sql_value(v))
+            .collect::<Vec<String>>()
+            .join(", "),
+        Value::Table(t) => {
+            let pairs = t
+                .iter()
+                .map(|(k, v)| format!("'{}': {}", k, convert_toml_value_to_sql_value(v)))
+                .collect::<Vec<String>>()
+                .join(", ");
+            format!("MAP {{{}}}", pairs)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -190,6 +235,22 @@ mod tests {
             println!("{}", entry.0);
             println!("{:?}", entry.1);
         }
+        Ok(())
+    }
+
+    #[test]
+    fn test_secrets() -> TestResult {
+        let config = DuckmanConfig::load_from("duckman.toml")?;
+        let default_profile = config.get_profiles().get("default").unwrap();
+        for (key, value) in default_profile.secret.iter() {
+            println!("{}", key);
+            println!("sql: {:?}", convert_secret_to_sql("hello", value));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_convert_secret_to_sql() -> TestResult {
         Ok(())
     }
 }
