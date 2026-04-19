@@ -1,15 +1,43 @@
 use crate::duckman_config::DuckmanConfig;
 use colored::Colorize;
-use flate2::read::GzDecoder;
 use futures_util::StreamExt;
-use indicatif::{ProgressBar, ProgressStyle};
 use std::fs;
-use std::io;
 use std::path::PathBuf;
 use std::process::Command;
 
 const CORE_EXTENSIONS_CSV: &str = include_str!("resources/core_extensions.csv");
 const COMMUNITY_EXTENSIONS_CSV: &str = include_str!("resources/community_extensions.csv");
+
+const DUCKDB_CORE_EXTENSIONS: [&str; 28] = [
+    "autocomplete",
+    "avro",
+    "aws",
+    "azure",
+    "delta",
+    "ducklake",
+    "encodings",
+    "excel",
+    "fts",
+    "httpfs",
+    "iceberg",
+    "icu",
+    "inet",
+    "jemalloc",
+    "json",
+    "lance",
+    "motherduck",
+    "mysql",
+    "parquet",
+    "postgres",
+    "spatial",
+    "sqlite",
+    "tpcds",
+    "tpch",
+    "unity_catalog",
+    "ui",
+    "vortex",
+    "vss",
+];
 
 // Platform identifier used in the extensions URL and install path
 fn platform_ext_id() -> &'static str {
@@ -28,7 +56,11 @@ fn platform_ext_id() -> &'static str {
     }
 }
 
-fn find_duckdb_binary() -> anyhow::Result<PathBuf> {
+fn find_duckdb_binary(duckdb_version: Option<&str>) -> anyhow::Result<PathBuf> {
+    // find specified version
+    if let Some(duckdb_version) = duckdb_version {
+        return Ok(DuckmanConfig::version_binary(duckdb_version));
+    }
     let config = DuckmanConfig::load()?;
     if !config.default.is_none() {
         let path = DuckmanConfig::version_binary(&config.default.clone().unwrap());
@@ -80,7 +112,7 @@ pub fn list_extensions(remote: bool) -> anyhow::Result<()> {
 }
 
 fn list_local_extensions() -> anyhow::Result<()> {
-    let duckdb = find_duckdb_binary()?;
+    let duckdb = find_duckdb_binary(None)?;
     let output = Command::new(&duckdb)
         .args([
             "-c",
@@ -131,63 +163,29 @@ fn list_remote_extensions() -> anyhow::Result<()> {
 
 // ── install ───────────────────────────────────────────────────────────────────
 
-pub async fn install_extension(name: &str) -> anyhow::Result<()> {
-    let version = get_default_version()?;
-    let platform = platform_ext_id();
-    let url = format!(
-        "http://extensions.duckdb.org/{}/{}/{}.duckdb_extension.gz",
-        version, platform, name
-    );
-
-    let client = reqwest::Client::new();
-    let response = client
-        .get(&url)
-        .header("User-Agent", "duckman/0.1.0")
-        .send()
-        .await?;
-
-    if !response.status().is_success() {
-        anyhow::bail!(
-            "Extension '{}' not found for {} {} (HTTP {})",
-            name,
-            version,
-            platform,
-            response.status()
-        );
+pub async fn install_extension(duckdb_version: Option<&str>, name: &str) -> anyhow::Result<()> {
+    let duckdb = find_duckdb_binary(duckdb_version)?;
+    let sql = if DUCKDB_CORE_EXTENSIONS.contains(&name) {
+        format!("install {}", name)
+    } else {
+        format!("install {} from community", name)
+    };
+    let output = Command::new(&duckdb).args(["-c", &sql]).output();
+    match output {
+        Ok(out) => {
+            if out.status.success() {
+                let output = String::from_utf8_lossy(&out.stdout);
+                if (!output.trim().is_empty()) {
+                    println!("{}", output);
+                } else {
+                    println!("Installed extension {}", name.green(),);
+                }
+            } else {
+                eprintln!("{}", String::from_utf8_lossy(&out.stderr));
+            }
+        }
+        Err(e) => anyhow::bail!("Failed to install extension ({}): {}", name, e),
     }
-
-    let total = response.content_length().unwrap_or(0);
-    let pb = ProgressBar::new(total);
-    pb.set_style(
-        ProgressStyle::default_bar()
-            .template(
-                "{spinner:.green} Downloading [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({binary_bytes_per_sec}, {eta})",
-            )?
-            .progress_chars("=>-"),
-    );
-
-    let mut stream = response.bytes_stream();
-    let mut gz_buf: Vec<u8> = Vec::new();
-    while let Some(chunk) = stream.next().await {
-        let chunk = chunk?;
-        pb.inc(chunk.len() as u64);
-        gz_buf.extend_from_slice(&chunk);
-    }
-    pb.finish_and_clear();
-
-    // Decompress .gz
-    let mut decoder = GzDecoder::new(gz_buf.as_slice());
-    let ext_dir = extensions_dir(&version);
-    fs::create_dir_all(&ext_dir)?;
-    let out_path = extension_path(&version, name);
-    let mut out_file = fs::File::create(&out_path)?;
-    io::copy(&mut decoder, &mut out_file)?;
-
-    println!(
-        "Installed extension {} → {}",
-        name.green(),
-        out_path.display()
-    );
     Ok(())
 }
 
@@ -211,7 +209,7 @@ pub fn uninstall_extension(name: &str) -> anyhow::Result<()> {
 // ── update ────────────────────────────────────────────────────────────────────
 
 pub fn update_extensions() -> anyhow::Result<()> {
-    let duckdb = find_duckdb_binary()?;
+    let duckdb = find_duckdb_binary(None)?;
     let output = Command::new(&duckdb)
         .args(["-c", "UPDATE EXTENSIONS"])
         .output();
@@ -226,4 +224,17 @@ pub fn update_extensions() -> anyhow::Result<()> {
         Err(e) => anyhow::bail!("Failed to run duckdb ({}): {}", duckdb.display(), e),
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use testresult::TestResult;
+
+    #[tokio::test]
+    async fn test_install_extension() -> TestResult {
+        let ext_name = "shellfs";
+        install_extension(None, ext_name).await?;
+        Ok(())
+    }
 }
