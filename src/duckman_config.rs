@@ -40,7 +40,7 @@ pub struct Profile {
     #[serde(default)]
     pub extensions: Vec<String>,
     #[serde(default)]
-    pub environments: HashMap<String, String>,
+    pub environment: HashMap<String, String>,
     #[serde(default)]
     pub secret: HashMap<String, toml::Table>,
     #[serde(default)]

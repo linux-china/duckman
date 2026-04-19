@@ -274,12 +274,12 @@ pub fn run_duckdb(
         // default profile check
         if let Some(default_profile) = profiles.get("default") {
             println!("Using default profile: {}", "default");
-            inject_profile(default_profile, &mut new_extra_args)
+            inject_profile(default_profile, &mut new_extra_args, &mut new_env)
         }
         if let Some(profile_name) = duckdb_profile {
             if let Some(profile) = profiles.get(&profile_name) {
                 println!("Using profile: {}", profile_name);
-                inject_profile(profile, &mut new_extra_args)
+                inject_profile(profile, &mut new_extra_args, &mut new_env)
             }
         }
     }
@@ -307,8 +307,21 @@ pub fn run_duckdb(
     }
 }
 
-fn inject_profile(profile: &Profile, args: &mut Vec<String>) {
-
+fn inject_profile(
+    profile: &Profile,
+    args: &mut Vec<String>,
+    new_env: &mut HashMap<String, String>,
+) {
+    // environment variable
+    if !profile.environment.is_empty() {
+        new_env.extend(
+            profile
+                .environment
+                .clone()
+                .iter()
+                .map(|(k, v)| (k.to_uppercase(), v.to_string())),
+        );
+    }
 }
 
 pub fn set_default_version(version: &str) -> anyhow::Result<()> {

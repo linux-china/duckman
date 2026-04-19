@@ -36,9 +36,9 @@ pub fn list_profiles() -> anyhow::Result<()> {
         }
 
         // ── environments ──────────────────────────────────────────────────────
-        if !profile.environments.is_empty() {
+        if !profile.environment.is_empty() {
             let vars: Vec<String> = profile
-                .environments
+                .environment
                 .iter()
                 .map(|(k, v)| format!("{}={}", k, v))
                 .collect();
