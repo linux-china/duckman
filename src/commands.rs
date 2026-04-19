@@ -245,6 +245,33 @@ pub fn run_duckdb(profile: Option<&str>, extra_args: Vec<String>) -> anyhow::Res
     )
 }
 
+pub fn which_duckdb(version: Option<&str>) -> anyhow::Result<()> {
+    let config = DuckmanConfig::load()?;
+    let resolved = version
+        .map(normalize_duckdb_version)
+        .or_else(|| config.get_duckdb_version(&None));
+
+    let resolved = match resolved {
+        Some(v) => v,
+        None => anyhow::bail!(
+            "No DuckDB version specified and no default set. \
+             Run `duckman install <version>` first."
+        ),
+    };
+
+    let binary = DuckmanConfig::version_binary(&resolved);
+    if !binary.exists() {
+        anyhow::bail!(
+            "DuckDB {} is not installed. Run `duckman install {}` first.",
+            resolved,
+            resolved
+        );
+    }
+
+    println!("{}", binary.display());
+    Ok(())
+}
+
 pub fn set_default_version(version: &str) -> anyhow::Result<()> {
     let version = normalize_duckdb_version(version);
     if !DuckmanConfig::is_duckdb_installed(&version) {
