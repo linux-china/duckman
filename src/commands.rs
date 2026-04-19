@@ -1,7 +1,7 @@
-use crate::runner::duckdb_execute;
 use crate::duckman_app::build_duckman_app;
 use crate::duckman_config::{DuckmanConfig, inject_profile, normalize_duckdb_version};
 use crate::github;
+use crate::runner::duckdb_execute;
 use clap::ArgMatches;
 use clap_complete::Shell::{Bash, Fish, PowerShell, Zsh};
 use clap_complete::{Shell, generate};
@@ -13,16 +13,16 @@ use std::{env, fs};
 
 const DUCKDB_VERSIONS_CSV: &str = include_str!("resources/duckdb_versions.csv");
 
-struct VersionEntry {
+struct DuckdbVersionRecord {
     version: String,
     date: String,
 }
 
-fn load_version_list() -> Vec<VersionEntry> {
+fn load_version_list() -> Vec<DuckdbVersionRecord> {
     let mut rdr = csv::Reader::from_reader(DUCKDB_VERSIONS_CSV.as_bytes());
     rdr.records()
         .filter_map(|r| r.ok())
-        .map(|r| VersionEntry {
+        .map(|r| DuckdbVersionRecord {
             version: r[0].to_string(),
             date: r[1].to_string(),
         })
@@ -50,7 +50,7 @@ pub async fn list_versions(local: bool, remote: bool) -> anyhow::Result<()> {
 
     if show_local {
         let config = DuckmanConfig::load()?;
-        let versions = config.installed_versions();
+        let versions = DuckmanConfig::installed_versions();
         println!("{}", "Installed versions:".bold());
         if versions.is_empty() {
             println!("  (none)");
@@ -67,10 +67,9 @@ pub async fn list_versions(local: bool, remote: bool) -> anyhow::Result<()> {
     }
 
     if show_remote {
-        let config = DuckmanConfig::load()?;
         println!("{}", "Available versions:".bold());
         for entry in load_version_list() {
-            let installed = config.is_installed(&entry.version);
+            let installed = DuckmanConfig::is_duckdb_installed(&entry.version);
             if installed {
                 println!(
                     "  {}  {}  {}",
@@ -91,7 +90,7 @@ pub async fn install_version(version: &str) -> anyhow::Result<()> {
     let version = normalize_duckdb_version(version);
     let mut config = DuckmanConfig::load()?;
 
-    if config.is_installed(&version) {
+    if DuckmanConfig::is_duckdb_installed(&version) {
         println!("DuckDB {} is already installed.", version.green());
         return Ok(());
     }
@@ -206,7 +205,7 @@ pub async fn uninstall_version(version: &str) -> anyhow::Result<()> {
     let version = normalize_duckdb_version(version);
     let mut config = DuckmanConfig::load()?;
 
-    if !config.is_installed(&version) {
+    if !DuckmanConfig::is_duckdb_installed(&version) {
         anyhow::bail!("DuckDB {} is not installed.", version);
     }
 
@@ -252,16 +251,14 @@ pub fn run_duckdb(
 
 pub fn set_default_version(version: &str) -> anyhow::Result<()> {
     let version = normalize_duckdb_version(version);
-    let mut config = DuckmanConfig::load()?;
-
-    if !config.is_installed(&version) {
+    if !DuckmanConfig::is_duckdb_installed(&version) {
         anyhow::bail!(
             "DuckDB {} is not installed. Run `duckman install {}` first.",
             version,
             version
         );
     }
-
+    let mut config = DuckmanConfig::load()?;
     config.set_default(&version);
     config.save()?;
     println!("Default DuckDB version set to {}.", version.green());
