@@ -59,6 +59,15 @@ pub fn build_duckman_app() -> Command {
                 .num_args(1)
                 .required(false),
         );
+    let which_command = Command::new("which")
+        .about("Print the absolute path of a DuckDB binary")
+        .arg(
+            Arg::new("version")
+                .help("DuckDB version (default: configured default)")
+                .index(1)
+                .num_args(1)
+                .required(false),
+        );
     // extension manager (ext)
     let ext_list = Command::new("list")
         .about("List installed/remote extensions")
@@ -136,6 +145,7 @@ pub fn build_duckman_app() -> Command {
         .subcommand(uninstall_command)
         .subcommand(run_command)
         .subcommand(default_command)
+        .subcommand(which_command)
         .subcommand(ext_command)
         .subcommand(profile_command)
         .subcommand(completion_command)

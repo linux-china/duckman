@@ -50,6 +50,10 @@ async fn main() -> anyhow::Result<()> {
                 .collect();
             commands::run_duckdb(profile, extra_args)?;
         }
+        Some(("which", m)) => {
+            let version = m.get_one::<String>("version").map(|s| s.as_str());
+            commands::which_duckdb(version)?;
+        }
         Some(("default", m)) => {
             if let Some(version) = m.get_one::<String>("version") {
                 commands::set_default_version(version)?;
