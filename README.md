@@ -14,6 +14,7 @@ Features:
 5. Profile Manager: secrets, S3, required extensions etc.
 6. MotherDuck integration
 7. DuckLake integration
+8. dotenv support: `.env` autoload into environment variables for `getenv('XXX')`
 
 ## profiles
 
