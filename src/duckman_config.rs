@@ -1,8 +1,8 @@
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fs;
 use std::path::{Path, PathBuf};
+use std::{env, fs};
 use toml::Value;
 
 #[cfg(unix)]
@@ -99,7 +99,7 @@ impl DuckmanConfig {
         Self::version_dir(version).join(binary_name())
     }
 
-    fn extension_dir(duckdb_version: &str, ext_name: &str) -> PathBuf {
+    pub fn extension_path(duckdb_version: &str, ext_name: &str) -> PathBuf {
         DuckmanConfig::version_dir(duckdb_version)
             .join("extensions")
             .join(duckdb_platform_id())
@@ -124,6 +124,20 @@ impl DuckmanConfig {
                 ..Default::default()
             })
         }
+    }
+
+    pub fn get_duckdb_version(&self) -> Option<String> {
+        if let Ok(version) = env::var("DUCKDB_VERSION") {
+            return Some(version);
+        }
+        if self.default.is_some() {
+            return Some(self.default.clone().unwrap());
+        }
+        let versions = self.installed_versions();
+        if let Some(version) = versions.into_iter().next() {
+            return Some(version);
+        }
+        None
     }
 
     pub fn save(&self) -> anyhow::Result<()> {
