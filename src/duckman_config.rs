@@ -8,7 +8,7 @@ use toml::Value;
 pub const CORE_EXTENSIONS_CSV: &str = include_str!("resources/core_extensions.csv");
 pub const COMMUNITY_EXTENSIONS_CSV: &str = include_str!("resources/community_extensions.csv");
 
-pub const DUCKDB_CORE_EXTENSIONS: [&str; 28] = [
+pub const DUCKDB_CORE_EXTENSIONS: [&str; 37] = [
     "autocomplete",
     "avro",
     "aws",
@@ -19,6 +19,9 @@ pub const DUCKDB_CORE_EXTENSIONS: [&str; 28] = [
     "excel",
     "fts",
     "httpfs",
+    "http",
+    "https",
+    "s3",
     "iceberg",
     "icu",
     "inet",
@@ -26,14 +29,20 @@ pub const DUCKDB_CORE_EXTENSIONS: [&str; 28] = [
     "json",
     "lance",
     "motherduck",
+    "md",
     "mysql",
+    "mysql_scanner",
     "parquet",
     "postgres",
+    "postgres_scanner",
     "spatial",
     "sqlite",
+    "sqlite_scanner",
+    "sqlite3",
     "tpcds",
     "tpch",
     "unity_catalog",
+    "uc_catalog",
     "ui",
     "vortex",
     "vss",
