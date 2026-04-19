@@ -80,6 +80,7 @@ pub struct DuckmanConfig {
 pub struct Profile {
     pub description: Option<String>,
     pub duckdb_version: Option<String>,
+    pub init_sql: Option<String>,
     pub parquet_key: Option<String>,
     #[serde(default)]
     pub extensions: Vec<String>,
@@ -395,6 +396,12 @@ pub fn inject_profile(
     // ducklake
     for (name, ducklake) in profile.ducklake.iter() {
         let sql = convert_ducklake_to_sql(name, ducklake);
+        args.push("-cmd".to_owned());
+        args.push(sql);
+    }
+    // init sql
+    if let Some(init_sql) = &profile.init_sql {
+        let sql = init_sql.replace("\n", " ");
         args.push("-cmd".to_owned());
         args.push(sql);
     }
