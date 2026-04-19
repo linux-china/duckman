@@ -15,6 +15,13 @@ mod runner;
 async fn main() -> anyhow::Result<()> {
     let matches = build_duckman_app().get_matches();
 
+    // inject global duckdb version
+    if let Some(duckdb_version) = matches.get_one::<String>("duckdb") {
+        unsafe {
+            env::set_var("DUCKDB_VERSION", duckdb_version);
+        }
+    }
+    // sub command match
     match matches.subcommand() {
         Some(("list", m)) => {
             let local = m.get_flag("local");
