@@ -59,7 +59,7 @@ async fn main() -> anyhow::Result<()> {
             }
             Some(("install", sm)) => {
                 let name = sm.get_one::<String>("name").unwrap();
-                ext_commands::install_extension(None, name).await?;
+                ext_commands::install_extension(name).await?;
             }
             Some(("uninstall", sm)) => {
                 let name = sm.get_one::<String>("name").unwrap();
