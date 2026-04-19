@@ -5,6 +5,40 @@ use std::path::{Path, PathBuf};
 use std::{env, fs};
 use toml::Value;
 
+pub const CORE_EXTENSIONS_CSV: &str = include_str!("resources/core_extensions.csv");
+pub const COMMUNITY_EXTENSIONS_CSV: &str = include_str!("resources/community_extensions.csv");
+
+pub const DUCKDB_CORE_EXTENSIONS: [&str; 28] = [
+    "autocomplete",
+    "avro",
+    "aws",
+    "azure",
+    "delta",
+    "ducklake",
+    "encodings",
+    "excel",
+    "fts",
+    "httpfs",
+    "iceberg",
+    "icu",
+    "inet",
+    "jemalloc",
+    "json",
+    "lance",
+    "motherduck",
+    "mysql",
+    "parquet",
+    "postgres",
+    "spatial",
+    "sqlite",
+    "tpcds",
+    "tpch",
+    "unity_catalog",
+    "ui",
+    "vortex",
+    "vss",
+];
+
 #[cfg(unix)]
 fn binary_name() -> &'static str {
     "duckdb"
@@ -110,6 +144,14 @@ impl DuckmanConfig {
         Self::home_dir().join("duckman.toml")
     }
 
+    pub fn is_duckdb_installed(duckdb_version: &str) -> bool {
+        Self::version_binary(duckdb_version).exists()
+    }
+
+    pub fn is_ext_installed(duckdb_version: &str, ext_name: &str) -> bool {
+        Self::extension_path(duckdb_version, ext_name).exists()
+    }
+
     pub fn load() -> anyhow::Result<Self> {
         let config_file = Self::config_file();
         Self::load_from(config_file)
@@ -146,10 +188,6 @@ impl DuckmanConfig {
         let content = toml::to_string_pretty(self)?;
         fs::write(Self::config_file(), content)?;
         Ok(())
-    }
-
-    pub fn is_installed(&self, version: &str) -> bool {
-        Self::version_binary(version).exists()
     }
 
     pub fn installed_versions(&self) -> Vec<String> {
@@ -279,10 +317,26 @@ fn convert_toml_value_to_sql_value(value: &toml::Value) -> String {
 }
 
 pub fn inject_profile(
+    duckdb_version: &str,
     profile: &Profile,
     args: &mut Vec<String>,
     new_env: &mut HashMap<String, String>,
 ) {
+    // load or install extensions
+    for ext_name in profile.extensions.iter() {
+        if !DuckmanConfig::is_ext_installed(duckdb_version, ext_name) {
+            let sql = if DUCKDB_CORE_EXTENSIONS.contains(&ext_name.as_ref()) {
+                format!("install {};", ext_name)
+            } else {
+                format!("install {} from community;", ext_name)
+            };
+            args.push("-c".to_owned());
+            args.push(sql);
+        } else {
+            args.push("-c".to_owned());
+            args.push(format!("load {};", ext_name));
+        }
+    }
     // environment variable
     if !profile.environment.is_empty() {
         new_env.extend(
