@@ -1,5 +1,6 @@
 use crate::commands::completion_command;
 use crate::duckman_app::build_duckman_app;
+use crate::duckman_config::DuckmanConfig;
 use std::env;
 use std::ffi::OsString;
 
@@ -49,8 +50,16 @@ async fn main() -> anyhow::Result<()> {
             commands::run_duckdb(profile, extra_args)?;
         }
         Some(("default", m)) => {
-            let version = m.get_one::<String>("version").unwrap();
-            commands::set_default_version(version)?;
+            if let Some(version) = m.get_one::<String>("version") {
+                commands::set_default_version(version)?;
+            } else {
+                let config = DuckmanConfig::load()?;
+                if let Some(default_version) = config.default {
+                    println!("Default DuckDB version: {}", default_version);
+                } else {
+                    println!("No default DuckDB version");
+                }
+            }
         }
         Some(("ext", m)) => match m.subcommand() {
             Some(("list", sm)) => {
