@@ -37,6 +37,11 @@ pub fn list_extensions(remote: bool) -> anyhow::Result<()> {
 }
 
 fn list_local_extensions() -> anyhow::Result<()> {
+    let config = &DuckmanConfig::load()?;
+    let duckdb_version = config.get_duckdb_version(&None);
+    if let Some(version) = duckdb_version {
+        println!("Listing extensions for DuckDB {}", version.green());
+    }
     let duckdb = find_duckdb_binary()?;
     let output = Command::new(&duckdb)
         .args([
