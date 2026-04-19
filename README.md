@@ -27,8 +27,9 @@ name, description, default duckdb version
 - S3 bucket list
 - attached db
 - ducklake
+- parquet key
 
-If profile name is default, and it means that this profile will be used as the default profile when running DuckDB.
+If profile name is `default`, and it means that this profile will be used as the default profile when running DuckDB.
 
 # extension sub command
 
@@ -38,14 +39,20 @@ If profile name is default, and it means that this profile will be used as the d
 
 # Environment variable
 
-- DUCKDB_VERSION: default DuckDB version to use
-- DUCKDB_PROFILE: default profile to run DuckDB
+- `DUCKDB_VERSION`: default DuckDB version to use
+- `DUCKDB_PROFILE`: default profile to run DuckDB
 
-# MontherDuck
+# FAQ
 
-DuckDB version: md
+### How to add MontherDuck support?
 
-- DuckDB version for md:  specified by MotherDuck
+```toml
+[profile.polyglot.environment]
+MOTHERDUCK_TOKEN = "xxxx"
+
+[profile.polyglot.attached.mydb]
+endpoint = "md:mydb"
+```
 
 # References
 
