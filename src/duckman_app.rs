@@ -118,7 +118,7 @@ pub fn build_duckman_app() -> Command {
             Arg::new("duckdb")
                 .short('d')
                 .long("duckdb")
-                .help("DuckDB version")
+                .help("Specify a DuckDB version or DUCKDB_VERSION env variable")
                 .num_args(1)
                 .required(false),
         )
