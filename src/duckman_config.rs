@@ -257,6 +257,61 @@ fn convert_toml_value_to_sql_value(value: &toml::Value) -> String {
     }
 }
 
+pub fn inject_profile(
+    profile: &Profile,
+    args: &mut Vec<String>,
+    new_env: &mut HashMap<String, String>,
+) {
+    // environment variable
+    if !profile.environment.is_empty() {
+        new_env.extend(
+            profile
+                .environment
+                .clone()
+                .iter()
+                .map(|(k, v)| (k.to_uppercase(), v.to_string())),
+        );
+    }
+    // secrets
+    for (name, value) in profile.secret.iter() {
+        let sql = convert_secret_to_sql(name, value);
+        args.push("-c".to_owned());
+        args.push(sql);
+    }
+    // buckets
+    for (name, value) in profile.bucket.iter() {
+        let sql = convert_bucket_to_sql(name, value);
+        args.push("-c".to_owned());
+        args.push(sql);
+    }
+    // parquet key
+    if let Some(parquet_key) = &profile.parquet_key {
+        let sql = format!("PRAGMA add_parquet_key('key256','{}');", parquet_key);
+        args.push("-c".to_owned());
+        args.push(sql);
+    }
+    // attached databases
+    for (name, attached_db) in profile.attached.iter() {
+        let sql = convert_attached_db_to_sql(name, attached_db);
+        args.push("-c".to_owned());
+        args.push(sql);
+    }
+    // ducklake
+    for (name, ducklake) in profile.ducklake.iter() {
+        let sql = convert_ducklake_to_sql(name, ducklake);
+        args.push("-c".to_owned());
+        args.push(sql);
+    }
+}
+
+pub fn normalize_duckdb_version(version: &str) -> String {
+    if version.starts_with('v') {
+        version.to_string()
+    } else {
+        format!("v{}", version)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
