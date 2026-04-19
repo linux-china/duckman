@@ -401,9 +401,11 @@ pub fn inject_profile(
     }
     // init sql
     if let Some(init_sql) = &profile.init_sql {
-        let sql = init_sql.replace("\n", " ");
-        args.push("-cmd".to_owned());
-        args.push(sql);
+        let sql = init_sql.replace("\n", " ").trim().to_string();
+        if sql.is_empty() {
+            args.push("-cmd".to_owned());
+            args.push(sql);
+        }
     }
 }
 
