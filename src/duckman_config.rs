@@ -116,8 +116,32 @@ pub struct AttachedDb {
     pub db_type: Option<String>,
     #[serde(rename = "path")]
     pub db_path: String,
-    pub encryption_key: Option<String>,
     pub sql: Option<String>,
+    pub options: Option<toml::Table>,
+}
+
+impl AttachedDb {
+    pub fn attach_options(&self) -> String {
+        if self.db_type.is_none() && self.options.is_none() {
+            return "".to_owned();
+        }
+        let mut options_text = " {".to_owned();
+        if let Some(db_type) = &self.db_type {
+            options_text.push_str(&format!("type {},", db_type));
+        }
+        if let Some(options) = &self.options {
+            for (name, value) in options.iter() {
+                options_text.push_str(&format!(
+                    " {} {},",
+                    name,
+                    convert_toml_value_to_sql_value(value)
+                ));
+            }
+        }
+        options_text.remove(options_text.len() - 1);
+        options_text.push('}');
+        return options_text;
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -290,17 +314,13 @@ pub fn convert_attached_db_to_sql(name: &str, db: &AttachedDb) -> String {
         // replace \n with space and convert to one-line string
         return sql.trim().replace('\n', " ");
     }
-    if let Some(encryption_key) = &db.encryption_key {
-        format!(
-            "ATTACH '{}' AS {} ( ENCRYPTION_KEY '{}');",
-            db.db_path, name, encryption_key
-        )
-    } else if let Some(db_type) = &db.db_type {
-        format!("ATTACH '{}' AS {} ( type {});", db.db_path, name, db_type)
-    } else {
-        // such as motherduck, `md:xxx`
-        format!("ATTACH '{}' AS {};", db.db_path, name)
-    }
+    // such as motherduck, `md:xxx`
+    format!(
+        "ATTACH '{}' AS {}{};",
+        db.db_path,
+        name,
+        db.attach_options()
+    )
 }
 
 pub fn convert_ducklake_to_sql(name: &str, db: &DuckLake) -> String {
