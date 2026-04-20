@@ -49,5 +49,9 @@ extensions = ["parquet", "excel"]
 nick = "Jackie"
 
 [profile.polyglot.attached.mydb]
-endpoint = "host=localhost user=root port=0 database=mysql"
+path = "host=localhost user=root port=0 database=mysql"
 type = "mysql"
+
+[profile.polyglot.attached.encrypted]
+path = "encrypted.duckdb"
+options = { ENCRYPTION_KEY = "xxx" }
