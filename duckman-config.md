@@ -189,12 +189,12 @@ You can use `openssl rand --base64 32` to generate a random 256-bit key.
 
 Databases to `ATTACH` at startup. Each entry is a named table under `[profile.<name>.attached.<db-name>]`.
 
-| Field            | Type   | Description                                                   |
-|------------------|--------|---------------------------------------------------------------|
-| `path`           | string | File path, connection string, or `md:` URI for Motherduck     |
-| `type`           | string | DB type: `sqlite`, `postgres`, `mysql`, `duckdb` … (optional) |
-| `encryption_key` | string | Decryption key for encrypted DuckDB files (optional)          |
-| `sql`            | string | Raw `ATTACH` SQL override (optional)                          |
+| Field     | Type   | Description                                                   |
+|-----------|--------|---------------------------------------------------------------|
+| `path`    | string | File path, connection string, or `md:` URI for Motherduck     |
+| `type`    | string | DB type: `sqlite`, `postgres`, `mysql`, `duckdb` … (optional) |
+| `sql`     | string | Raw `ATTACH` SQL override (optional)                          |
+| `options` | Map    | Additional options as key=value pairs                         |
 
 #### SQLite
 
@@ -326,11 +326,11 @@ use_ssl = "false"
 
 [profile.analytics.attached.app_sqlite]
 type = "sqlite"
-endpoint = "/var/data/app.sqlite"
+path = "/var/data/app.sqlite"
 
 [profile.analytics.attached.pg_prod]
 type = "postgres"
-endpoint = "dbname=prod host=pg.internal user=analyst password=secret"
+path = "dbname=prod host=pg.internal user=analyst password=secret"
 
 [profile.analytics.ducklake.prod_lake]
 catalog_endpoint = "ducklake:s3://my-bucket/catalog.db"
