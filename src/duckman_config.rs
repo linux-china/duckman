@@ -131,11 +131,11 @@ impl AttachedDb {
         }
         if let Some(options) = &self.options {
             for (name, value) in options.iter() {
-                options_text.push_str(&format!(
-                    " {} {},",
-                    name,
-                    convert_toml_value_to_sql_value(value)
-                ));
+                let mut text_value = convert_toml_value_to_sql_value(value);
+                if name.eq_ignore_ascii_case("secret") {
+                    text_value = text_value.trim_matches('\'').to_string();
+                }
+                options_text.push_str(&format!(" {} {},", name, text_value));
             }
         }
         options_text.remove(options_text.len() - 1);
