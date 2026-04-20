@@ -14,8 +14,9 @@ Features:
 5. Profile Manager: secrets, S3, required extensions etc.
 6. MotherDuck integration
 7. DuckLake integration
-8. dotenv support: `.env` autoload into environment variables for `getenv('XXX')`
-9. Duckman shim: a wrapper for DuckDB executable, it is used to switch DuckDB version and profile
+8. Iceberg integration
+9. dotenv support: `.env` autoload into environment variables for `getenv('XXX')`
+10. Duckman shim: a wrapper for DuckDB executable, it is used to switch DuckDB version and profile
 
 ## profiles
 
@@ -99,11 +100,24 @@ $ ~/bin/duckdb --version
 ### How to add MontherDuck support?
 
 ```toml
-[profile.polyglot.environment]
+[profile.analytics.environment]
 MOTHERDUCK_TOKEN = "xxxx"
 
-[profile.polyglot.attached.mydb]
-endpoint = "md:mydb"
+[profile.analytics.attached.mydb]
+path = "md:mydb"
+```
+
+### How to add Iceberg support?
+
+```toml
+[profile.analytics.secret.iceberg_secret]
+type = "iceberg"
+token = "bearer_token"
+
+[profile.analytics.attached.myberg]
+type = "iceberg"
+path = "warehouse"
+options = { SECRET = "iceberg_secret", ENDPOINT = "https://rest_endpoint.com" }
 ```
 
 # References
