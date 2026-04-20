@@ -43,6 +43,38 @@ fn platform_asset_name() -> &'static str {
     }
 }
 
+pub fn count_versions() -> anyhow::Result<()> {
+    let versions = DuckmanConfig::installed_versions();
+    println!("Installed DuckDB versions: {} 🦆", versions.len().to_string().green());
+    for version in &versions {
+        let binary = DuckmanConfig::version_binary(version);
+        let ext_count = if binary.exists() {
+            let output = std::process::Command::new(&binary)
+                .args([
+                    "-csv",
+                    "-c",
+                    "SELECT count(*) FROM duckdb_extensions() WHERE installed = true",
+                ])
+                .output();
+            match output {
+                Ok(out) if out.status.success() => {
+                    let stdout = String::from_utf8_lossy(&out.stdout);
+                    stdout
+                        .lines()
+                        .nth(1)
+                        .and_then(|l| l.trim().parse::<usize>().ok())
+                        .unwrap_or(0)
+                }
+                _ => 0,
+            }
+        } else {
+            0
+        };
+        println!("  {}  extensions: {}", version.green(), ext_count.to_string().cyan());
+    }
+    Ok(())
+}
+
 pub async fn list_versions(local: bool, remote: bool) -> anyhow::Result<()> {
     // Default: show local if no flags given
     let show_local = local || (!local && !remote);

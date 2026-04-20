@@ -128,6 +128,8 @@ pub fn build_duckman_app() -> Command {
                 .num_args(1)
                 .required(false),
         );
+    let count_command =
+        Command::new("count").about("Count installed DuckDB versions and extensions(数鸭子)");
     Command::new("duckman")
         .version(VERSION)
         .author("linux_china <libing.chen@gmail.com>")
@@ -146,6 +148,7 @@ pub fn build_duckman_app() -> Command {
         .subcommand(run_command)
         .subcommand(default_command)
         .subcommand(which_command)
+        .subcommand(count_command)
         .subcommand(ext_command)
         .subcommand(profile_command)
         .subcommand(completion_command)

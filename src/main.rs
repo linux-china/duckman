@@ -54,6 +54,9 @@ async fn main() -> anyhow::Result<()> {
             let version = m.get_one::<String>("version").map(|s| s.as_str());
             commands::which_duckdb(version)?;
         }
+        Some(("count", _)) => {
+            commands::count_versions()?;
+        }
         Some(("default", m)) => {
             if let Some(version) = m.get_one::<String>("version") {
                 commands::set_default_version(version)?;
