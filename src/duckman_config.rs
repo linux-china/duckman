@@ -114,7 +114,8 @@ pub struct Secret {
 pub struct AttachedDb {
     #[serde(rename = "type")]
     pub db_type: Option<String>,
-    pub endpoint: String,
+    #[serde(rename = "path")]
+    pub db_path: String,
     pub encryption_key: Option<String>,
     pub sql: Option<String>,
 }
@@ -292,13 +293,13 @@ pub fn convert_attached_db_to_sql(name: &str, db: &AttachedDb) -> String {
     if let Some(encryption_key) = &db.encryption_key {
         format!(
             "ATTACH '{}' AS {} ( ENCRYPTION_KEY '{}');",
-            db.endpoint, name, encryption_key
+            db.db_path, name, encryption_key
         )
     } else if let Some(db_type) = &db.db_type {
-        format!("ATTACH '{}' AS {} ( type {});", db.endpoint, name, db_type)
+        format!("ATTACH '{}' AS {} ( type {});", db.db_path, name, db_type)
     } else {
         // such as motherduck, `md:xxx`
-        format!("ATTACH '{}' AS {};", db.endpoint, name)
+        format!("ATTACH '{}' AS {};", db.db_path, name)
     }
 }
 

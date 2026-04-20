@@ -191,7 +191,7 @@ Databases to `ATTACH` at startup. Each entry is a named table under `[profile.<n
 
 | Field            | Type   | Description                                                   |
 |------------------|--------|---------------------------------------------------------------|
-| `endpoint`       | string | File path, connection string, or `md:` URI                    |
+| `path`           | string | File path, connection string, or `md:` URI for Motherduck     |
 | `type`           | string | DB type: `sqlite`, `postgres`, `mysql`, `duckdb` … (optional) |
 | `encryption_key` | string | Decryption key for encrypted DuckDB files (optional)          |
 | `sql`            | string | Raw `ATTACH` SQL override (optional)                          |
@@ -201,7 +201,7 @@ Databases to `ATTACH` at startup. Each entry is a named table under `[profile.<n
 ```toml
 [profile.analytics.attached.app_db]
 type = "sqlite"
-endpoint = "/var/data/app.sqlite"
+path = "/var/data/app.sqlite"
 ```
 
 Generated SQL: `ATTACH '/var/data/app.sqlite' AS app_db (type sqlite);`
@@ -211,7 +211,7 @@ Generated SQL: `ATTACH '/var/data/app.sqlite' AS app_db (type sqlite);`
 ```toml
 [profile.analytics.attached.pg_prod]
 type = "postgres"
-endpoint = "dbname=prod host=pg.internal user=analyst password=secret"
+path = "dbname=prod host=pg.internal user=analyst password=secret"
 ```
 
 Generated SQL: `ATTACH 'dbname=prod host=pg.internal ...' AS pg_prod (type postgres);`
@@ -220,7 +220,7 @@ Generated SQL: `ATTACH 'dbname=prod host=pg.internal ...' AS pg_prod (type postg
 
 ```toml
 [profile.analytics.attached.secure_db]
-endpoint = "/data/sensitive.duckdb"
+path = "/data/sensitive.duckdb"
 encryption_key = "my-aes-256-key-here"
 ```
 
@@ -233,7 +233,7 @@ Generated SQL: `ATTACH '/data/sensitive.duckdb' AS secure_db (ENCRYPTION_KEY 'my
 MOTHERDUCK_TOKEN = "xxxx"
 
 [profile.analytics.attached.md_warehouse]
-endpoint = "md:my_warehouse"
+path = "md:my_warehouse"
 ```
 
 Generated SQL: `ATTACH 'md:my_warehouse' AS md_warehouse;`

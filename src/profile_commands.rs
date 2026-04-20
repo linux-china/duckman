@@ -79,7 +79,7 @@ pub fn list_profiles() -> anyhow::Result<()> {
                     "    attached:    {} [{}] {}",
                     name,
                     db.db_type.clone().unwrap_or("".to_string()),
-                    db.endpoint.dimmed()
+                    db.db_path.dimmed()
                 );
             }
         }
