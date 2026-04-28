@@ -45,7 +45,10 @@ fn platform_asset_name() -> &'static str {
 
 pub fn count_versions() -> anyhow::Result<()> {
     let versions = DuckmanConfig::installed_versions();
-    println!("Installed DuckDB versions: {} 🦆", versions.len().to_string().green());
+    println!(
+        "Installed DuckDB versions: {} 🦆",
+        versions.len().to_string().green()
+    );
     for version in &versions {
         let binary = DuckmanConfig::version_binary(version);
         let ext_count = if binary.exists() {
@@ -70,7 +73,11 @@ pub fn count_versions() -> anyhow::Result<()> {
         } else {
             0
         };
-        println!("  {}  extensions: {}", version.green(), ext_count.to_string().cyan());
+        println!(
+            "  {}  extensions: {}",
+            version.green(),
+            ext_count.to_string().cyan()
+        );
     }
     Ok(())
 }
@@ -118,7 +125,66 @@ pub async fn list_versions(local: bool, remote: bool) -> anyhow::Result<()> {
     Ok(())
 }
 
+fn version_from_path_binary(binary_path: &std::path::Path) -> anyhow::Result<String> {
+    let output = std::process::Command::new(binary_path)
+        .arg("--version")
+        .output()?;
+    if !output.status.success() {
+        anyhow::bail!("Failed to run {} --version", binary_path.display());
+    }
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let version = stdout
+        .split_whitespace()
+        .next()
+        .ok_or_else(|| anyhow::anyhow!("Empty output from {} --version", binary_path.display()))?
+        .to_string();
+    Ok(version)
+}
+
+async fn install_from_path(src: &str) -> anyhow::Result<()> {
+    let src_path = std::path::Path::new(src);
+    if !src_path.exists() {
+        anyhow::bail!("File not found: {}", src);
+    }
+    let version = version_from_path_binary(src_path)?;
+    let version = normalize_duckdb_version(&version);
+    let mut config = DuckmanConfig::load()?;
+
+    if DuckmanConfig::is_duckdb_installed(&version) {
+        println!("DuckDB {} is already installed.", version.green());
+        return Ok(());
+    }
+
+    let version_dir = DuckmanConfig::version_dir(&version);
+    fs::create_dir_all(&version_dir)?;
+    let binary_path = DuckmanConfig::version_binary(&version);
+    fs::copy(src_path, &binary_path)?;
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms = fs::metadata(&binary_path)?.permissions();
+        perms.set_mode(0o755);
+        fs::set_permissions(&binary_path, perms)?;
+    }
+
+    if config.default.is_none() {
+        config.set_default(&version);
+        println!("Set {} as the default version.", version.green());
+    }
+    config.save()?;
+    println!(
+        "Installed DuckDB {} -> {}",
+        version.green(),
+        binary_path.display()
+    );
+    Ok(())
+}
+
 pub async fn install_version(version: &str) -> anyhow::Result<()> {
+    if version.contains('/') || version.contains('\\') {
+        return install_from_path(version).await;
+    }
     let version = normalize_duckdb_version(version);
     let mut config = DuckmanConfig::load()?;
 
