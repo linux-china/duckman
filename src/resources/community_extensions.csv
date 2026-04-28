@@ -1,153 +1,231 @@
 Name,Description
 a5,Hierarchical pentagonial indexing for geospatial data that is equal-area and millimeter accurate.
+acp,Natural language to SQL via Claude Code using the Agent Client Protocol (ACP). Query your data with plain English via CLAUDE statements or the claude() table function.
+adbc_scanner,An ADBC client extension for DuckDB that can access ADBC provided data sources.
+agent_data,"A DuckDB extension written in Rust for querying, analysing and inspecting AI coding agents history. Read conversations, plans, todos, history, and usage stats directly from your local agent data directories."
+airport,"The Airport extension brings Arrow Flight support to DuckDB, enabling DuckDB to query, modify, and store data from Arrow Flight servers."
 aixchess,Efficiently query large chess game collections
-anndata,Read AnnData (.h5ad) files for single-cell genomics data analysis with support for local and remote (HTTP/HTTPS/S3) files
-nanoarrow,Allows the consumption and production of the Apache Arrow interprocess communication (IPC) format both from files and directly from stream buffers.
-astro,Astronomical calculations - coordinate transforms photometry cosmology dust extinction sidereal time
-bigquery,Integrates DuckDB with Google BigQuery allowing direct querying and management of BigQuery datasets
-bitfilters,Provides high-performance space-efficient probabilistic data structures including quotient XOR and binary fuse filters for fast approximate set membership testing with no false negatives and configurable false positive rates.
+anndata,"Read AnnData (.h5ad) files for single-cell genomics data analysis, with support for local and remote (HTTP/HTTPS/S3) files"
+anofox_forecast,"Statistical timeseries forecasting in DuckDB. Support ARIMA, SARIMA, ETS, TBATS, MFLES, MSTL, and other models."
+anofox_statistics,"A DuckDB extension for statistical regression analysis, providing OLS, Ridge, WLS, and time-series regression capabilities with complete diagnostics and inference directly in SQL."
+anofox_tabular,A duckdb extension which combines data quality and data preparation tools for tabular data.
+arrow,"This extension is an alias to the nanoarrow extension. Allows the consumption and production of the Apache Arrow interprocess communication (IPC) format, both from files and directly from stream buffers."
+astro,"Astronomical calculations + FITS file I/O - coordinate transforms, photometry, cosmology, dust extinction, sidereal time"
+behavioral,"Behavioral analytics functions inspired by ClickHouse (sessionize, retention, window_funnel, sequence_match, sequence_count, sequence_match_events, sequence_next_node)"
+bigquery,"Integrates DuckDB with Google BigQuery, allowing direct querying and management of BigQuery datasets"
+bitfilters,"Provides high-performance, space-efficient probabilistic data structures—including quotient, XOR, and binary fuse filters—for fast approximate set membership testing with no false negatives and configurable false positive rates."
 blockduck,Live SQL Queries on Blockchain
-boilstream,Secure remote secrets storage with OPAQUE PAKE authentication email/password registration MFA login and automatic ducklake mounting
-brew,Get locally homebrew casks packages and formulas and their dependencies as nicely types tables
+boilstream,"Secure remote secrets storage with OPAQUE PAKE authentication, email/password registration, MFA login, and automatic ducklake mounting"
+brew,"Get locally homebrew casks, packages and formulas and their dependencies as nicely types tables"
 bvh2sql,BVH (BioVision Hierarchy) motion capture file parser for DuckDB
 cache_httpfs,Read cached filesystem for httpfs
-cache_prewarm,Prewarm data blocks into DuckDB's buffer pool or OS page cache for faster queries
+cache_prewarm,"Prewarm data blocks into DuckDB's buffer pool or OS page cache for faster queries"
 capi_quack,Provides a hello world example demo from the C/C++ C API template
+cassandra,"Connect to Apache Cassandra, ScyllaDB, and DataStax Astra databases directly from DuckDB. Query Cassandra tables using SQL with support for all major Cassandra data types, SSL/TLS connections, and cloud deployments."
 celestial,Astronomical coordinates utilities
-chaos,Creates chaos! Chaos allows you to throw any type of DuckDB exception or to raise a SIGSEGV SIGABRT or SIGBUS signal.
-clamp,Provides mathematical clamp functions for numeric types in DuckDB including general clamping saturate and others. Ensures values stay within a specified range and handles NULLs and NaNs correctly.
+chaos,"Creates chaos! ⋆✴︎˚｡⋆ Chaos allows you to throw any type of DuckDB exception, or to raise a SIGSEGV, SIGABRT, or SIGBUS signal."
+chess,A DuckDB extension for parsing and analyzing chess games in PGN format.
+chsql,ClickHouse SQL Macros for DuckDB
+chsql_native,ClickHouse Native Client & File Reader for chsql
+cityjson,"Read, write, and query CityJSON, CityJSONSeq, and FlatCityBuf 3D city model files."
+clamp,"Provides mathematical clamp functions for numeric types in DuckDB, including general clamping, saturate, and others. Ensures values stay within a specified range and handles NULLs and NaNs correctly."
 cloudfront,AWS CloudFront signed cookie authentication for DuckDB httpfs
 crawler,SQL-native web crawler with HTML extraction and MERGE support
 cronjob,DuckDB HTTP Cronjob Extension
-curl_httpfs,httpfs with connection pool HTTP/2 and async IO.
+crypto,Cryptographic hash functions and HMAC
+curl_httpfs,"httpfs with connection pool, HTTP/2 and async IO."
 cwiqduck,DuckDB filesystem extension for CWIQ FS
-dash,A fully local visual data explorer within DuckDB for building interactive dashboards and DAG pipelines.
-datasketches,By utilizing the Apache DataSketches library this extension can efficiently compute approximate distinct item counts and estimations of quantiles while allowing the sketches to be serialized.
+dash,A fully visual data explorer and GUI for DuckDB. Create interactive dashboards and DAG pipelines.
+datasketches,"By utilizing the Apache DataSketches library this extension can efficiently compute approximate distinct item counts and estimations of quantiles, while allowing the sketches to be serialized."
+dazzleduck,Arrow IPC over HTTP client with array functions and bloom filters
 decimal_arithmetic,Extension that adds support special decimal arithmetic functions
 delta_classic,Attach a directory of Delta tables as a single DuckDB database with automatic schema discovery
 delta_export,Export DuckLake catalog tables to Delta Lake format
+dns,The DNS Extension enables DNS lookups and reverse DNS lookups from within DuckDB
+dplyr,R dplyr pipeline syntax support for DuckDB - transpiles dplyr verbs to SQL
 dqtest,Define and run data-quality tests inside DuckDB
-duck_block_utils,Build transform validate and extract content from structured documents using the duck_block type
+duck_block_utils,"Build, transform, validate, and extract content from structured documents using the duck_block type"
 duck_delta_share,DuckDB Extension for Delta Sharing
-duck_dggs,DuckDB extension for discrete global grid systems (DGGS) powered by DGGRID v8
-duck_geoarrow,DuckDB extension for converting GEOMETRY/WKB to and from GeoArrow native encodings powered by geoarrow-c.
-duck_hunt,Parse and analyze test results build outputs and CI/CD pipeline logs from 110+ formats with severity filtering format auto-detection and context extraction
+duck_dggs,DuckDB extension for discrete global grid systems (DGGS) powered by DGGRID v8.
+duck_geoarrow,"DuckDB extension for converting GEOMETRY/WKB to and from GeoArrow native encodings, powered by geoarrow-c. Built against DuckDB v1.5.2"
+duck_hunt,"Parse and analyze test results, build outputs, and CI/CD pipeline logs from 110+ formats with severity filtering, format auto-detection, and context extraction"
 duck_lineage,The Duck Lineage extension automatically captures query lineage events and sends them to an Open Lineage backend.
 duck_lk,Query LabKey Server tables with automatic local Parquet caching
-duck_tails,Smart Development Intelligence for DuckDB - Git-aware data analysis capabilities that allow querying git history accessing files at any revision and performing version-aware data analysis with SQL.
+duck_tails,"Smart Development Intelligence for DuckDB - Git-aware data analysis capabilities that allow querying git history, accessing files at any revision, and performing version-aware data analysis with SQL."
 duckdb_geoip_rs,Retrieve geo ip data from MMDB database
-duckdb_mcp,Model Context Protocol (MCP) extension for DuckDB that enables seamless integration between SQL databases and MCP servers.
-duckdb_zarr,Explore Zarr stores with SQL through relational metadata chunk discovery and dense cell scans
-duckdbi,Browser-based BI dashboard extension for DuckDB. Run SQL queries and build interactive dashboards with drag-and-drop charts all from the DuckDB CLI.
+duckdb_mcp,Model Context Protocol (MCP) extension for DuckDB that enables seamless integration between SQL databases and MCP servers. Provides both client capabilities for accessing remote MCP resources via SQL and server capabilities for exposing database content as MCP resources.
+midi,"Read, analyze, generate, and play MIDI files with SQL. Provides table functions for parsing Standard MIDI Files, scalar functions for note/frequency conversion, and macOS playback via AudioToolbox."
+duckdb_zarr,"Explore Zarr stores with SQL through relational metadata, chunk discovery, and dense cell scans"
+duckdbi,"Browser-based BI dashboard extension for DuckDB. Run SQL queries and build interactive dashboards with drag-and-drop charts, all from the DuckDB CLI."
 duckgl,DuckDB geospatial visualization with deck.gl and MapLibre
+duckherder,Run duckdb query on remote server
+duckhog,Query PostHog data warehouse from DuckDB over Arrow Flight SQL
 duckhts,DuckDB extension for reading HTS file formats via htslib
-ducksmiles,Cheminformatics toolkit for DuckDB - SMILES InChI MOL/SDF PDB and SELFIES molecular analysis from SQL
+duckpgq,Extension that adds support for SQL/PGQ and graph algorithms
+ducksmiles,"Cheminformatics toolkit for DuckDB - SMILES, InChI, MOL/SDF, PDB, and SELFIES molecular analysis from SQL"
 ducksync,Intelligent query result caching between DuckDB and Snowflake with TTL and smart refresh
-ducktinycc,DuckDB C extension for in-process JIT compiled C UDFs via TinyCC — self-contained no external runtime required
+ducktinycc,"DuckDB C extension for in-process JIT compiled C UDFs via TinyCC — self-contained, no external runtime required"
 eeagrid,Extension that adds support for working with the EEA Reference Grid System.
-eenddb,The long-awaited Dutch localization of DuckDB's SQL dialect
-erpl_web,ERPL is a DuckDB extension to connect to API based ecosystems via standard interfaces like OData GraphQL and REST.
+eenddb,"The long-awaited Dutch localization of DuckDB's SQL dialect"
+elasticsearch,Query Elasticsearch indices directly using SQL
+erpl_web,"ERPL is a DuckDB extension to connect to API based ecosystems via standard interfaces like OData, GraphQL and REST. This works e.g. for SAP ERP, SAP Ariba, SAP C4C, Microsoft Dynamics and many more."
+eurostat,Extension that adds support for reading data from EUROSTAT database using SQL.
 evalexpr_rhai,Evaluate the Rhai scripting language in DuckDB
 events,A extension that hooks into database events and sends JSON-formatted notifications to external programs.
 faiss,Provides access to faiss indices from DuckDB.
+fakeit,The FakeIt Extension enables generation of realistic fake/test data directly in SQL queries
+file_dialog,Choose a file via native file dialog
+finetype,"Semantic type classification — detects 250 data types (emails, URLs, dates, UUIDs, currencies, etc.) from raw strings"
 fire_duck_ext,Query Google Cloud Firestore directly from DuckDB using SQL
+fit,"Read Garmin .fit files using DuckDB - GPS tracks, heart rate, power metrics, and fitness device data"
+fivetran,Fivetran community extension.
 flock,LLM & RAG extension to combine analytics and semantic analysis
 fsquery,Query filesystem metadata using SQL with recursive directory traversal
 func_apply,Dynamic function invocation - call any scalar function or macro by name at runtime
 fuzzycomplete,Fuzzy matching based autocompletion
+gaggle,A DuckDB extension for working with Kaggle datasets
+gcs,DuckDB GCS Extension
 gdx,Read GAMS GDX files directly into DuckDB
+geography,Global spatial data processing on the sphere
 geosilo,Compact geometry encoding using delta-encoded coordinates. Achieves 3-4x smaller geometry storage and wire transfer compared to WKB.
+geotiff,"Read GeoTIFF rasters as (cell_id, value) via GDAL"
 gh,Experimental gh:// filesystem support
 gsheets,Read and write Google Sheets using SQL
 h3,Hierarchical hexagonal indexing for geospatial data
 h5db,Read HDF5 datasets and attributes
-hashfuncs,Non-cryptographic hash functions xxHash rapidhash and Murmurhash3
+hashfuncs,"Non-cryptographic hash functions, xxHash, rapidhash and Murmurhash3"
+hdf5,Read HDF5 files from DuckDB
 hedged_request_fs,Provides hedged request for filesystem operations
-hive_metastore,Connect to your Hive Metastore attach it as a native DuckDB catalog and query the data inside with ease!
-hnsw_acorn,HNSW vector search with ACORN-1 filtered search RaBitQ quantization metadata joins and grouped nearest neighbors
+highs,HiGHS - High Performance Optimization Software
+hive_metastore,"Connect to your Hive Metastore, attach it as a native DuckDB catalog and query the data inside with ease!"
+hnsw_acorn,"HNSW vector search with ACORN-1 filtered search, RaBitQ quantization, metadata joins, and grouped nearest neighbors"
 hostfs,Navigate and explore the filesystem using SQL
+html_query,"Query HTML using CSS selectors, extract JSON from LD+JSON, JavaScript variables, and Next.js RSC"
+html_readability,"Extract readable content from HTML using Mozilla's Readability algorithm"
 http_client,DuckDB HTTP Client Extension
+http_request,HTTP client extension for DuckDB with GET/POST/PUT/PATCH/DELETE and byte-range requests
 http_stats,Better HTTP statistics for DuckDB
+httpd_log,Reads and parses Apache HTTP server log files
 httpfs_timeout_retry,Add per-operation timeout and retry for httpfs extension
+httpserver,DuckDB HTTP API Server Extension
+infera,A DuckDB extension for in-database inference
 inflector,Powerful string case transformation and inflection capabilities directly to your SQL queries.
 ion,Read AWS Ion data and write Ion text or binary with typed mappings
 json_schema,Adds support for validating JSON data with JSON schemas.
-keboola,DuckDB extension for Keboola Storage — query and write Keboola tables using standard SQL
+jsonata,"The JSONata extension for DuckDB enables expressive, JSON-focused querying and transformation directly within SQL using the powerful JSONata expression language."
+jwt,Decode and work with JWT (JSON Web Token) in SQL queries
+keboola,"DuckDB extension for Keboola Storage — query and write Keboola tables using standard SQL"
 lastra,Reader for the Lastra columnar time-series format
 latency_injection_fs,Used to inject simulated latency to filesystem operations
 level_pivot,Storage extension wrapping LevelDB with pivot semantics for structured relational tables over key-value pairs
-lindel,Linearization/Delinearization Z-Order Hilbert and Morton Curves
-llm,Call LLM APIs (OpenAI Gemini Cloudflare) directly from SQL with structured output support.
+lindel,"Linearization/Delinearization, Z-Order, Hilbert and Morton Curves"
+llm,"Call LLM APIs (OpenAI, Gemini, Cloudflare) directly from SQL with structured output support."
+lsh,Extension for locality-sensitive hashing (LSH)
 lua,Evaluate Lua scripts within queries
 magic,libmagic/file utilities ported to DuckDB
-marisa,Adds MARISA trie functionality for DuckDB. MARISA is a static and space-efficient trie data structure that enables fast string lookups prefix searches and predictive text operations.
-markdown,Read analyze and write Markdown files with block-level document representation and inline element support
-maxmind,Read MaxMind databases (GeoLite GeoIP and more)
-miint,Bioinformatics extension for microbiome research - read/write FASTQ SAM/BAM BIOM GFF Newick trees query NCBI and more.
-minijinja,Adds templating to DuckDB enabling dynamic generation of text HTML and reports directly within SQL queries using the MiniJinja engine.
+marisa,"Adds MARISA (Matching Algorithm with Recursively Implemented StorAge) trie functionality for DuckDB. MARISA is a static and space-efficient trie data structure that enables fast string lookups, prefix searches, and predictive text operations."
+markdown,"Read, analyze, and write Markdown files with block-level document representation and inline element support"
+maxmind,"Read MaxMind databases (GeoLite, GeoIP, and more)"
+miint,"Bioinformatics extension for microbiome research - read/write FASTQ, SAM/BAM, BIOM, GFF, Newick trees, query NCBI, and more."
+minijinja,"Adds templating to DuckDB, enabling dynamic generation of text, HTML, and reports directly within SQL queries using the MiniJinja engine."
 miniplot,Interactive chart visualization for DuckDB - faster than pandas with Plotly-like charts
 mlpack,Connecting duckdb to the mlpack C++ machine learning library
-mongo,Integrates DuckDB with MongoDB enabling direct SQL queries over MongoDB collections without exporting data or ETL
-mpduck,Read and write FIS Prophet files (.rpt .prn .fac)
+monetary,"Currency-aware monetary values with parsing, arithmetic, and real-time exchange rates"
+mongo,"Integrates DuckDB with MongoDB, enabling direct SQL queries over MongoDB collections without exporting data or ETL"
+mooncake,Read Iceberg tables written by moonlink in real time
+mpduck,"Read and write FIS Prophet files (.rpt, .prn, .fac)"
+msolap,Extension that allows DuckDB to connect to Microsoft SQL Server Analysis Services (SSAS) and other OLAP data sources using the MSOLAP provider
 mssql,Connect DuckDB to Microsoft SQL Server via native TDS protocol
-netquack,DuckDB extension for parsing extracting and analyzing domains URIs and paths with ease.
+nanoarrow,"Allows the consumption and production of the Apache Arrow interprocess communication (IPC) format, both from files and directly from stream buffers."
+nanodbc,Connect to any ODBC-compatible database and query data directly from DuckDB
+nats_js,Query NATS JetStream message streams directly with SQL
+netquack,"DuckDB extension for parsing, extracting, and analyzing domains, URIs, and paths with ease."
 nsv,Read and write NSV (Newline-Separated Values) files
-oast,Validate decode and extract OAST (Out-of-Band Application Security Testing) domains in SQL
+oast,"Validate, decode, and extract OAST (Out-of-Band Application Security Testing) domains in SQL"
 observefs,Provides IO observability to filesystem
+ofquack,The Ofquack extension provides seamless integration between DuckDB and Oracle Fusion via WSDL-based SOAP calls.
+onager,A DuckDB extension for graph data analytics
+onelake,"This extension allows you to connect DuckDB to Microsoft Fabric OneLake workspaces and lakehouses, enabling you to query data stored in OneLake directly from DuckDB."
 open_prompt,Interact with LLMs with a simple DuckDB Extension
-otlp,Read OpenTelemetry metrics logs and traces from JSON or protobuf with a ClickHouse-inspired schema
-overture,Overture Maps helpers for DuckDB - geocoding category normalization spatial tiling and reader macros for places buildings roads and addresses
+osmium,Read OpenStreetMap data from OSM XML and PBF files
+otlp,"Read OpenTelemetry metrics, logs and traces from JSON or protobuf with a ClickHouse-inspired schema"
+overture,"Overture Maps helpers for DuckDB - geocoding, category normalization, spatial tiling, and reader macros for places, buildings, roads, and addresses"
 pac,Automatic query privatization using the PAC Privacy framework
 paimon,Query Apache Paimon tables directly from DuckDB
-parser_tools,Exposes functions for parsing referenced tables and usage context from SQL queries using DuckDB's native parser.
+parser_tools,"Exposes functions for parsing referenced tables and usage context from SQL queries using DuckDB's native parser."
 pbix,Extension that allows parsing the data model embedded in PowerBI (pbix) files
+pcap_reader,Read PCAP files from DuckDB
+pdal,Extension that adds support for manipulating point cloud data using SQL.
 pfc,Read PFC-JSONL compressed log files directly in DuckDB with block-level timestamp filtering
 pivot_table,Provides a spreadsheet-style pivot_table function
 plinking_duck,Read PLINK 2 genomics file formats and run common genetic analyses directly in SQL
-poached,SQL parsing and introspection for IDEs editors and developer tools
-psql,Support for PSQL a piped SQL dialect for DuckDB
-pst,Read Microsoft PST files with rich schemas for common MAPI types (emails contacts appointments tasks)
+poached,"SQL parsing and introspection for IDEs, editors, and developer tools"
+polyglot,Transpile SQL from 34 different dialects into DuckDB SQL
+prql,"Support for PRQL, the Pipelined Relational Query Language"
+psql,"Support for PSQL, a piped SQL dialect for DuckDB"
+pst,"Read Microsoft PST files with rich schemas for common MAPI types (emails, contacts, appointments, tasks)"
 psyduck,Pokemon data native in DuckDB
+pyroscope,DuckDB Pyroscope Extension for Continuous Profiling
 quack,Provides a hello world example demo
-query_condition_cache,This extension provides a cache for query conditions which is useful for repeated-query workloads like metrics monitoring dashboards log investigations etc.
+quackfix,"Allows the consumption FIX protocol format logs, from all supported duckdb filesystems."
+quackformers,Bert-based embedding extension.
+quackstats,Time series forecasting and statistics for DuckDB
+quackstore,QuackStore - Smart Block-Based Caching for Remote Files. Speed up repeated queries on remote data with intelligent block-level caching.
+query_condition_cache,"This extension provides a cache for query conditions, which is useful for repeated-query workloads like metrics monitoring dashboards, log investigations, etc."
 quickjs,DuckDB QuickJS Runtime Extension
 radio,Allow interaction with event buses like Websocket and Redis publish/subscribe servers.
-rapidfuzz,Provides adds high-performance fuzzy string matching functions powered by the RapidFuzz C++ library.
-raquet,Raster analytics on Raquet files with QUADBIN spatial indexing raster ingestion and PostGIS-style functions
+rapidfuzz,"Provides adds high-performance fuzzy string matching functions, powered by the RapidFuzz C++ library."
+raquet,"Raster analytics on Raquet files with QUADBIN spatial indexing, raster ingestion, and PostGIS-style functions"
 raster,DuckDB Extension for reading and writing raster files using SQL.
-rate_limit_fs,Perform rate and burst limit on filesystem
+rate_limit_fs,Perform rate and burst limit on filesystem operations
 rdf,A DuckDB extension to read and write RDF
 read_dbf,Read DBF (dBase) files with support for general DBF formats and field types.
 read_lines,"Read line-based text files with line numbers and efficient subset extraction. Supports glob patterns, line selection, and context lines around matches."
 read_stat,"Read data sets from SAS, Stata, and SPSS with ReadStat"
 redis,Redis compatible Client for DuckDB
+rusty_quack,Provides a hello world example demo from the Rust-based extension template
 rusty_sheet,An Excel/WPS/OpenDocument Spreadsheets file reader for DuckDB
+sazgar,"System monitoring & SQL query routing for DuckDB - 25+ table functions for CPU, memory, disk, network, processes, Docker, GPU. Execute queries on remote databases via PostgreSQL wire protocol with SQLGlot dialect translation (PostgreSQL, MySQL, ClickHouse, Snowflake, BigQuery)."
 scalarfs,A collection of virtual filesystems for working with scalars
 scrooge,"Provides functionality for financial data-analysis, including data scanners for the Ethereum Blockchain and Yahoo Finance"
 se3,Provides SE(3) rigid transformations (combinations of rotations and translations in 3D) as DuckDB scalar functions.
+semantic_views,"Semantic views -- a declarative layer for dimensions, metrics, and relationships"
 sheetreader,Fast XLSX file importer
 shellfs,Allow shell commands to be used for input and output
-sistat,Query Slovenia's SiStat (SURS PX-Web API) open data directly from DuckDB with SQL.
+sistat,"Query Slovenia's SiStat (SURS PX-Web API) open data directly from DuckDB with SQL."
 sitemap,Parse XML sitemaps from websites with automatic discovery via robots.txt
 sitting_duck,"Parse and analyze source code ASTs from 27 programming languages with tree-sitter grammars, pattern matching, and structural search"
+duckdb_slack,Search Slack messages directly from DuckDB
 snowflake,Snowflake data source extension - query Snowflake databases directly from DuckDB
 splink_udfs,"Phonetic, text normalization and address matching functions for record linkage."
+spxlsx,Query SharePoint lists and Excel workbooks directly from DuckDB
 sshfs,Allows reading and writing files over SSH
+st_read_multi,Read multiple geospatial files
 stochastic,"Add comprehensive statistical distribution functions to DuckDB, enabling advanced statistical analysis, probability calculations, and random sampling directly within SQL queries."
+substrait,Allows conversion execution of Substrait query plans
 sudan,"Unified SQL access to Sudan's humanitarian, development, and geospatial data from 5 international APIs (World Bank, WHO, FAO, UNHCR, ILO)"
 system_stats,Provides table functions to access system-level statistics for monitoring purpose
 table_inspector,"Observability into DuckDB storage internals at the database, table, and column levels"
-talib,Technical Analysis Library (TA-Lib) functions for DuckDB – 100+ indicators for financial market analysis
+talib,Technical Analysis Library (TA-Lib) functions for DuckDB -- 100+ indicators for financial market analysis
+tarfs,"glob, open and read files within `.tar` archives"
 tera,"Adds templating to DuckDB, enabling dynamic generation of text, HTML, and reports directly within SQL queries using the Tera engine."
 textplot,"Enables text-based data visualization directly in SQL queries, including ASCII/Unicode bar charts, density plots, and sparklines for lightweight analytics and dashboards."
+title_mapper,Efficiently standardizes scraped job titles to Bureau of Labor Statistics (BLS) titles using a high-performance TF-IDF algorithm.
+tributary,Enable DuckDB to interact with Apache Kafka
 tsid,DuckDB Time-Sortable ID generator
+ulid,ULID data type for DuckDB
+urlpattern,WHATWG URLPattern API for matching and extracting components from URLs using pattern syntax
+us_address_standardizer,US address parsing and standardization (PAGC + Rust addrust)
 valhalla_routing,DuckDB extension for routing and travel time calculations using Valhalla routing engine
+warc,Parse WARC (Web ARChive) records for Common Crawl data processing
 web_archive,Query Common Crawl and Wayback Machine web archive CDX APIs directly from SQL
 web_search,Query Google Custom Search API directly from SQL with filter pushdowns
 webbed,"Comprehensive processing extension for web markup languages (XML and HTML) with SAX streaming for large files, intelligent schema inference, XPath-based data extraction, and HTML table parsing."
+webdavfs,Allows reading and writing files over WebDAV protocol
+webmacro,Load DuckDB Macros from the web
 whisper,"Speech-to-text transcription using whisper.cpp, OpenAI's Whisper model"
 wireduck,Read and dissect PCAP files from DuckDB
 yaml,"Read YAML files into DuckDB with native YAML type support, comprehensive extraction functions, and seamless JSON interoperability"
-yardstick,Measure-aware SQL implementing Julian Hyde's 'Measures in SQL' paper
+yardstick,"Measure-aware SQL implementing Julian Hyde's 'Measures in SQL' paper"
 zeek,Read Zeek network security monitor log files with automatic schema detection and type-aware parsing
 zipfs,Read files within zip archives
