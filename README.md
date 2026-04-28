@@ -77,6 +77,14 @@ You just execute:
 $ unzip -d $HOME/.duckdb/versions/v1.5.2 duckdb_cli-osx-amd64.zip
 ```
 
+### How to install DuckDB from local path?
+
+You just execute:
+
+```
+$ duckman install ~/Downloads/duckdb
+```
+
 ### How does Duckman choose profile?
 
 - option first: `--profile xxx`
