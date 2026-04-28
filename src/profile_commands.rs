@@ -1,4 +1,7 @@
-use crate::duckman_config::DuckmanConfig;
+use crate::duckman_config::{
+    DUCKDB_CORE_EXTENSIONS, DuckmanConfig, convert_attached_db_to_sql, convert_bucket_to_sql,
+    convert_ducklake_to_sql, convert_secret_to_sql,
+};
 use colored::Colorize;
 
 // ── Commands ──────────────────────────────────────────────────────────────────
@@ -99,4 +102,115 @@ pub fn list_profiles() -> anyhow::Result<()> {
     }
 
     Ok(())
+}
+
+pub fn dump_profile(profile_name: &str) -> anyhow::Result<()> {
+    let config = DuckmanConfig::load()?;
+    let profiles = config.get_profiles();
+
+    let profile = profiles
+        .get(profile_name)
+        .ok_or_else(|| anyhow::anyhow!("Profile '{}' not found.", profile_name))?;
+
+    let duckdb_bin = if let Some(ver) = &profile.duckdb_version {
+        DuckmanConfig::version_binary(ver)
+            .to_string_lossy()
+            .to_string()
+    } else if let Some(ver) = config.default.as_deref() {
+        DuckmanConfig::version_binary(ver)
+            .to_string_lossy()
+            .to_string()
+    } else {
+        "duckdb".to_string()
+    };
+
+    println!("#!/bin/sh");
+    if let Some(desc) = &profile.description {
+        println!("# Profile: {} - {}", profile_name, desc);
+    } else {
+        println!("# Profile: {}", profile_name);
+    }
+
+    // environment variables
+    if !profile.environment.is_empty() {
+        println!("# Environment variables:");
+        for (key, val) in &profile.environment {
+            println!("export {}={}", key.to_uppercase(), shell_escape(val));
+        }
+    }
+    // extensions install
+    if !profile.extensions.is_empty() {
+        println!("# Install extensions:");
+        let mut command_line = duckdb_bin.clone();
+        for ext_name in &profile.extensions {
+            if DUCKDB_CORE_EXTENSIONS.contains(&ext_name.as_ref()) {
+                command_line.push_str(&format!(" -c 'install {}'", ext_name));
+            } else {
+                command_line.push_str(&format!(" -c 'install {} from community'", ext_name));
+            };
+        }
+        println!("{}", command_line);
+    }
+
+    // collect -cmd arguments
+    let mut cmds: Vec<String> = Vec::new();
+
+    for ext in &profile.extensions {
+        cmds.push(format!("load {};", ext));
+    }
+    if let Some(parquet_key) = &profile.parquet_key {
+        cmds.push(format!(
+            "PRAGMA add_parquet_key('key256','{}');",
+            parquet_key
+        ));
+    }
+    for (name, value) in &profile.secret {
+        cmds.push(convert_secret_to_sql(name, value));
+    }
+    for (name, value) in &profile.bucket {
+        cmds.push(convert_bucket_to_sql(name, value));
+    }
+    for (name, db) in &profile.attached {
+        cmds.push(convert_attached_db_to_sql(name, db));
+    }
+    for (name, lake) in &profile.ducklake {
+        cmds.push(convert_ducklake_to_sql(name, lake));
+    }
+
+    if !cmds.is_empty() {
+        println!();
+        print!("{}", duckdb_bin);
+        for cmd in &cmds {
+            print!(" \\\n  -cmd {}", shell_escape(cmd));
+        }
+        println!(" \\\n  \"$@\"");
+    }
+
+    Ok(())
+}
+
+fn shell_escape(s: &str) -> String {
+    if s.contains(|c: char| {
+        matches!(
+            c,
+            ' ' | '\t'
+                | '"'
+                | '\''
+                | '\\'
+                | '$'
+                | '`'
+                | '!'
+                | '('
+                | ')'
+                | '{'
+                | '}'
+                | '|'
+                | '&'
+                | ';'
+        )
+    }) {
+        format!("'{}'", s.replace('\'', "'\\''"))
+    } else {
+        s.to_string()
+    }
 }

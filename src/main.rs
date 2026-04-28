@@ -93,6 +93,10 @@ async fn main() -> anyhow::Result<()> {
         },
         Some(("profile", m)) => match m.subcommand() {
             Some(("list", _)) => profile_commands::list_profiles()?,
+            Some(("dump", sm)) => {
+                let name = sm.get_one::<String>("name").unwrap();
+                profile_commands::dump_profile(name)?;
+            }
             _ => unreachable!(),
         },
         Some(("completion", sub_command_matches)) => {

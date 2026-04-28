@@ -113,10 +113,20 @@ pub fn build_duckman_app() -> Command {
         .subcommand(ext_migrate);
     // profile manager
     let profile_list = Command::new("list").about("List all profiles");
+    let profile_dump = Command::new("dump")
+        .about("Dump a profile as a shell script")
+        .arg(
+            Arg::new("name")
+                .help("Profile name")
+                .index(1)
+                .num_args(1)
+                .required(true),
+        );
     let profile_command = Command::new("profile")
         .about("Manage profiles")
         .subcommand_required(true)
-        .subcommand(profile_list);
+        .subcommand(profile_list)
+        .subcommand(profile_dump);
     // completion
     let completion_command = Command::new("completion")
         .about("Output auto-completion script for bash/zsh/fish/powershell")
