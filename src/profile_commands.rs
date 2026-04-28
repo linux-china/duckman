@@ -112,7 +112,8 @@ pub fn dump_profile(profile_name: &str) -> anyhow::Result<()> {
         .get(profile_name)
         .ok_or_else(|| anyhow::anyhow!("Profile '{}' not found.", profile_name))?;
 
-    let duckdb_bin = if let Some(ver) = &profile.duckdb_version {
+    // duckdb bin executable path
+    let mut duckdb_bin = if let Some(ver) = &profile.duckdb_version {
         DuckmanConfig::version_binary(ver)
             .to_string_lossy()
             .to_string()
@@ -123,6 +124,13 @@ pub fn dump_profile(profile_name: &str) -> anyhow::Result<()> {
     } else {
         "duckdb".to_string()
     };
+    if let Some(user_home_path) = dirs::home_dir() {
+        let user_home = user_home_path.to_string_lossy().to_string();
+        if duckdb_bin.starts_with(&user_home) {
+            // replace user home with `$HOME`
+            duckdb_bin = duckdb_bin.replace(&user_home, "$HOME");
+        }
+    }
 
     println!("#!/bin/sh");
     if let Some(desc) = &profile.description {
@@ -137,6 +145,7 @@ pub fn dump_profile(profile_name: &str) -> anyhow::Result<()> {
         for (key, val) in &profile.environment {
             println!("export {}={}", key.to_uppercase(), shell_escape(val));
         }
+        println!();
     }
     // extensions install
     if !profile.extensions.is_empty() {
