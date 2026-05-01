@@ -11,6 +11,7 @@ mod ext_commands;
 mod github;
 mod profile_commands;
 mod runner;
+mod snippet_commands;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -96,6 +97,14 @@ async fn main() -> anyhow::Result<()> {
             Some(("dump", sm)) => {
                 let name = sm.get_one::<String>("name").unwrap();
                 profile_commands::dump_profile(name)?;
+            }
+            _ => unreachable!(),
+        },
+        Some(("snippet", m)) => match m.subcommand() {
+            Some(("list", _)) => snippet_commands::list_snippets()?,
+            Some(("show", sm)) => {
+                let name = sm.get_one::<String>("name").unwrap();
+                snippet_commands::show_snippet(name)?;
             }
             _ => unreachable!(),
         },

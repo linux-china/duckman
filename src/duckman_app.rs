@@ -140,6 +140,20 @@ pub fn build_duckman_app() -> Command {
         );
     let count_command =
         Command::new("count").about("Count installed DuckDB versions and extensions(数鸭子)");
+    // snippet manager
+    let snippet_list = Command::new("list").about("List all snippets");
+    let snippet_show = Command::new("show").about("Show a snippet").arg(
+        Arg::new("name")
+            .help("Snippet name (filename without .md)")
+            .index(1)
+            .num_args(1)
+            .required(true),
+    );
+    let snippet_command = Command::new("snippet")
+        .about("Manage DuckDB snippets")
+        .subcommand_required(true)
+        .subcommand(snippet_list)
+        .subcommand(snippet_show);
     Command::new("duckman")
         .version(VERSION)
         .author("linux_china <libing.chen@gmail.com>")
@@ -161,5 +175,6 @@ pub fn build_duckman_app() -> Command {
         .subcommand(count_command)
         .subcommand(ext_command)
         .subcommand(profile_command)
+        .subcommand(snippet_command)
         .subcommand(completion_command)
 }
