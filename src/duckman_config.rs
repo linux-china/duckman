@@ -225,7 +225,7 @@ impl DuckmanConfig {
             if let Some(offset) = content.find("dotenv.public.key") {
                 let remain = &content[offset + 17..];
                 if let Some(offset2) = remain.find('\n') {
-                    let pub_key = &remain[..offset2].replace(&['=', '"', '\'', ' '], "");
+                    let pub_key = &remain[..offset2].replace(&['=', ':', '"', '\'', ' '], "");
                     config.public_key = Some(pub_key.to_owned());
                 }
             }
@@ -264,7 +264,16 @@ impl DuckmanConfig {
         use toml_edit::{DocumentMut, value};
         let home = Self::home_dir();
         fs::create_dir_all(&home)?;
-        let content = toml::to_string_pretty(self)?;
+        // use toml_edit to keep comments, reserved format
+        let content = if let Ok(toml_content) = fs::read_to_string(Self::config_file()) {
+            let mut doc: DocumentMut = toml_content.parse().expect("invalid toml");
+            if let Some(default_version) = &self.default {
+                doc["default"] = value(default_version.clone());
+            }
+            doc.to_string()
+        } else {
+            toml::to_string_pretty(self)?
+        };
         fs::write(Self::config_file(), content)?;
         Ok(())
     }
