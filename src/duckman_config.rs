@@ -176,6 +176,10 @@ impl DuckmanConfig {
         Self::home_dir().join("versions")
     }
 
+    pub fn snippets_dir() -> PathBuf {
+        duckman_home_dir().join("snippets")
+    }
+
     pub fn version_dir(version: &str) -> PathBuf {
         Self::versions_dir().join(normalize_duckdb_version(version))
     }
