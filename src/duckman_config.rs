@@ -1,5 +1,6 @@
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
+use std::ascii::AsciiExt;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
@@ -140,7 +141,7 @@ impl AttachedDb {
         if self.db_type.is_none() && self.options.is_none() {
             return "".to_owned();
         }
-        let mut options_text = " {".to_owned();
+        let mut options_text = " (".to_owned();
         if let Some(db_type) = &self.db_type {
             options_text.push_str(&format!("type {},", db_type));
         }
@@ -154,7 +155,7 @@ impl AttachedDb {
             }
         }
         options_text.remove(options_text.len() - 1);
-        options_text.push('}');
+        options_text.push(')');
         return options_text;
     }
 }
@@ -315,11 +316,11 @@ pub fn convert_secret_to_sql(
     }
     let mut sql = format!("CREATE OR REPLACE SECRET {} (", name);
     for (key, value) in secret_value {
-        sql.push_str(&format!(
-            " {} {},",
-            key,
-            convert_toml_value_to_sql_value(private_key, value)
-        ));
+        let mut sql_value = convert_toml_value_to_sql_value(private_key, value);
+        if key.eq_ignore_ascii_case("type") {
+            sql_value = sql_value.replace(&['"', '\''], "");
+        }
+        sql.push_str(&format!(" {} {},", key, sql_value));
     }
     sql.remove(sql.len() - 1);
     //sql = sql[0..sql.len() - 2].to_string();
@@ -340,7 +341,7 @@ pub fn convert_bucket_to_sql(
     for (key, value) in bucket {
         let mut value = convert_toml_value_to_sql_value(private_key, value);
         if key.eq_ignore_ascii_case("type") || key.eq_ignore_ascii_case("provider") {
-            value = value.trim_matches('\'').to_string();
+            value = value.replace(&['"', '\''], "").to_string();
         }
         sql.push_str(&format!(" {} {},", key, value));
     }
