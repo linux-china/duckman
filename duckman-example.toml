@@ -1,3 +1,7 @@
+# ---
+# uuid: 019de241-9889-7c2c-94a5-4de78ccb2cc7
+# dotenv.public.key: 02054a69d217d6c7af9868d5613650e149b35b0fb2d9acbef7989d67f38c360d13
+# ---
 default = "v1.5.2"
 
 # profile of default
