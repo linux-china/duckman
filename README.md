@@ -17,6 +17,7 @@ Features:
 8. Iceberg integration
 9. dotenv support: `.env` autoload into environment variables for `getenv('XXX')`
 10. Duckman shim: a wrapper for DuckDB executable, it is used to switch DuckDB version and profile
+11. [dotenvx-rs](https://github.com/linux-china/dotenvx-rs) integration
 
 ## profiles
 
