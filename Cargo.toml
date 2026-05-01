@@ -39,7 +39,7 @@ toml = "1.1.2+spec-1.1.0"
 toml_edit = "0.25.11+spec-1.1.0"
 lazy_static = "1.5.0"
 which = "8"
-dotenvy = "0.15.7"
+dotenvx-rs = "0.4.30"
 
 [dev-dependencies]
 testresult = "0.4.1"
