@@ -37,7 +37,7 @@ pub fn build_duckman_app() -> Command {
         );
     let install_command = Command::new("install").about("Install DuckDB").arg(
         Arg::new("version")
-            .help("DuckDB version to install")
+            .help("DuckDB version, path or system to install")
             .index(1)
             .num_args(1)
             .required(true),
