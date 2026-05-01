@@ -16,6 +16,8 @@ pub fn duckdb_execute(
             duckdb_version
         );
     }
+    // private key
+    let private_key = &config.get_private_key();
     // environment variables
     let mut new_env: HashMap<String, String> = env::vars().collect();
     let mut new_extra_args = vec![];
@@ -26,13 +28,25 @@ pub fn duckdb_execute(
         // default profile check
         if let Some(default_profile) = profiles.get("default") {
             //println!("Using default profile: {}", "default");
-            inject_profile(duckdb_version, default_profile, &mut new_extra_args, &mut new_env)
+            inject_profile(
+                duckdb_version,
+                default_profile,
+                &mut new_extra_args,
+                &mut new_env,
+                private_key,
+            )
         }
         if let Some(profile_name) = duckdb_profile {
             if profile_name != "default" {
                 if let Some(profile) = profiles.get(profile_name) {
                     //println!("Using profile: {}", profile_name);
-                    inject_profile(duckdb_version, profile, &mut new_extra_args, &mut new_env)
+                    inject_profile(
+                        duckdb_version,
+                        profile,
+                        &mut new_extra_args,
+                        &mut new_env,
+                        private_key,
+                    )
                 }
             }
         }

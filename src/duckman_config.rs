@@ -78,6 +78,19 @@ pub struct DuckmanConfig {
     pub profile: Option<HashMap<String, Profile>>,
 }
 
+impl DuckmanConfig {
+    pub fn get_private_key(&self) -> Option<String> {
+        if let Some(public_key) = &self.public_key {
+            if let Ok(private_key) =
+                dotenvx_rs::dotenvx::get_private_key(&Some(public_key.to_string()), &None)
+            {
+                return Some(private_key);
+            }
+        }
+        None
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct Profile {
     pub description: Option<String>,
@@ -123,7 +136,7 @@ pub struct AttachedDb {
 }
 
 impl AttachedDb {
-    pub fn attach_options(&self) -> String {
+    pub fn attach_options(&self, private_key: &Option<String>) -> String {
         if self.db_type.is_none() && self.options.is_none() {
             return "".to_owned();
         }
@@ -133,7 +146,7 @@ impl AttachedDb {
         }
         if let Some(options) = &self.options {
             for (name, value) in options.iter() {
-                let mut text_value = convert_toml_value_to_sql_value(value);
+                let mut text_value = convert_toml_value_to_sql_value(private_key, value);
                 if name.eq_ignore_ascii_case("secret") {
                     text_value = text_value.trim_matches('\'').to_string();
                 }
@@ -291,7 +304,11 @@ impl DuckmanConfig {
     }
 }
 
-pub fn convert_secret_to_sql(name: &str, secret_value: &toml::Table) -> String {
+pub fn convert_secret_to_sql(
+    private_key: &Option<String>,
+    name: &str,
+    secret_value: &toml::Table,
+) -> String {
     if let Some(sql) = secret_value.get("sql") {
         // replace \n with space and convert to one-line string
         return sql.as_str().unwrap().trim().replace('\n', " ");
@@ -301,7 +318,7 @@ pub fn convert_secret_to_sql(name: &str, secret_value: &toml::Table) -> String {
         sql.push_str(&format!(
             " {} {},",
             key,
-            convert_toml_value_to_sql_value(value)
+            convert_toml_value_to_sql_value(private_key, value)
         ));
     }
     sql.remove(sql.len() - 1);
@@ -310,14 +327,18 @@ pub fn convert_secret_to_sql(name: &str, secret_value: &toml::Table) -> String {
     sql
 }
 
-pub fn convert_bucket_to_sql(name: &str, bucket: &toml::Table) -> String {
+pub fn convert_bucket_to_sql(
+    private_key: &Option<String>,
+    name: &str,
+    bucket: &toml::Table,
+) -> String {
     if let Some(sql) = bucket.get("sql") {
         // replace \n with space and convert to one-line string
         return sql.as_str().unwrap().trim().replace('\n', " ");
     }
     let mut sql = format!("CREATE OR REPLACE SECRET {} (", name);
     for (key, value) in bucket {
-        let mut value = convert_toml_value_to_sql_value(value);
+        let mut value = convert_toml_value_to_sql_value(private_key, value);
         if key.eq_ignore_ascii_case("type") || key.eq_ignore_ascii_case("provider") {
             value = value.trim_matches('\'').to_string();
         }
@@ -329,7 +350,11 @@ pub fn convert_bucket_to_sql(name: &str, bucket: &toml::Table) -> String {
     sql
 }
 
-pub fn convert_attached_db_to_sql(name: &str, db: &AttachedDb) -> String {
+pub fn convert_attached_db_to_sql(
+    private_key: &Option<String>,
+    name: &str,
+    db: &AttachedDb,
+) -> String {
     if let Some(sql) = db.sql.as_ref() {
         // replace \n with space and convert to one-line string
         return sql.trim().replace('\n', " ");
@@ -339,7 +364,7 @@ pub fn convert_attached_db_to_sql(name: &str, db: &AttachedDb) -> String {
         "ATTACH '{}' AS {}{};",
         db.db_path,
         name,
-        db.attach_options()
+        db.attach_options(private_key)
     )
 }
 
@@ -354,10 +379,10 @@ pub fn convert_ducklake_to_sql(name: &str, db: &DuckLake) -> String {
     )
 }
 
-fn convert_toml_value_to_sql_value(value: &toml::Value) -> String {
+fn convert_toml_value_to_sql_value(private_key: &Option<String>, value: &Value) -> String {
     match value {
         Value::String(s) => {
-            format!("'{}\'", s.as_str())
+            format!("'{}\'", decrypt_value(private_key, s.as_str()))
         }
         Value::Integer(i) => i.to_string(),
         Value::Float(f) => f.to_string(),
@@ -365,13 +390,19 @@ fn convert_toml_value_to_sql_value(value: &toml::Value) -> String {
         Value::Datetime(d) => d.to_string(),
         Value::Array(a) => a
             .iter()
-            .map(|v| convert_toml_value_to_sql_value(v))
+            .map(|v| convert_toml_value_to_sql_value(private_key, v))
             .collect::<Vec<String>>()
             .join(", "),
         Value::Table(t) => {
             let pairs = t
                 .iter()
-                .map(|(k, v)| format!("'{}': {}", k, convert_toml_value_to_sql_value(v)))
+                .map(|(k, v)| {
+                    format!(
+                        "'{}': {}",
+                        k,
+                        convert_toml_value_to_sql_value(private_key, v)
+                    )
+                })
                 .collect::<Vec<String>>()
                 .join(", ");
             format!("MAP {{{}}}", pairs)
@@ -379,11 +410,23 @@ fn convert_toml_value_to_sql_value(value: &toml::Value) -> String {
     }
 }
 
+pub fn decrypt_value(private_key: &Option<String>, value: &str) -> String {
+    if value.starts_with("encrypted:") {
+        if let Some(pri_key) = private_key {
+            if let Ok(plain_value) = dotenvx_rs::decrypt_dotenvx_item(&pri_key, value) {
+                return plain_value;
+            }
+        }
+    }
+    value.to_string()
+}
+
 pub fn inject_profile(
     duckdb_version: &str,
     profile: &Profile,
     args: &mut Vec<String>,
     new_env: &mut HashMap<String, String>,
+    private_key: &Option<String>,
 ) {
     // load or install extensions
     for ext_name in profile.extensions.iter() {
@@ -407,30 +450,31 @@ pub fn inject_profile(
                 .environment
                 .clone()
                 .iter()
-                .map(|(k, v)| (k.to_uppercase(), v.to_string())),
+                .map(|(k, v)| (k.to_uppercase(), decrypt_value(private_key, v))),
         );
     }
     // secrets
     for (name, value) in profile.secret.iter() {
-        let sql = convert_secret_to_sql(name, value);
+        let sql = convert_secret_to_sql(private_key, name, value);
         args.push("-cmd".to_owned());
         args.push(sql);
     }
     // buckets
     for (name, value) in profile.bucket.iter() {
-        let sql = convert_bucket_to_sql(name, value);
+        let sql = convert_bucket_to_sql(private_key, name, value);
         args.push("-cmd".to_owned());
         args.push(sql);
     }
     // parquet key
     if let Some(parquet_key) = &profile.parquet_key {
+        let parquet_key = decrypt_value(private_key, parquet_key);
         let sql = format!("PRAGMA add_parquet_key('key256','{}');", parquet_key);
         args.push("-cmd".to_owned());
         args.push(sql);
     }
     // attached databases
     for (name, attached_db) in profile.attached.iter() {
-        let sql = convert_attached_db_to_sql(name, attached_db);
+        let sql = convert_attached_db_to_sql(private_key, name, attached_db);
         args.push("-cmd".to_owned());
         args.push(sql);
     }
@@ -483,6 +527,7 @@ mod tests {
     fn test_load_from() -> TestResult {
         let config = DuckmanConfig::load_from("duckman-example.toml")?;
         println!("{:?}", config);
+        println!("{:#?}", config.get_private_key());
         Ok(())
     }
 
@@ -502,7 +547,7 @@ mod tests {
         let default_profile = config.get_profiles().get("default").unwrap();
         for (key, value) in default_profile.secret.iter() {
             println!("{}", key);
-            println!("sql: {:?}", convert_secret_to_sql("hello", value));
+            println!("sql: {:?}", convert_secret_to_sql(&None, "hello", value));
         }
         Ok(())
     }
@@ -513,7 +558,7 @@ mod tests {
         let default_profile = config.get_profiles().get("default").unwrap();
         for (key, value) in default_profile.bucket.iter() {
             println!("{}", key);
-            println!("sql: {:?}", convert_bucket_to_sql(key, value));
+            println!("sql: {:?}", convert_bucket_to_sql(&None, key, value));
         }
         Ok(())
     }

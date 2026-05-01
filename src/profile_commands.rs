@@ -1,6 +1,6 @@
 use crate::duckman_config::{
     DUCKDB_CORE_EXTENSIONS, DuckmanConfig, convert_attached_db_to_sql, convert_bucket_to_sql,
-    convert_ducklake_to_sql, convert_secret_to_sql,
+    convert_ducklake_to_sql, convert_secret_to_sql, decrypt_value,
 };
 use colored::Colorize;
 
@@ -139,11 +139,18 @@ pub fn dump_profile(profile_name: &str) -> anyhow::Result<()> {
         println!("# Profile: {}", profile_name);
     }
 
+    // private key
+    let private_key = &config.get_private_key();
+
     // environment variables
     if !profile.environment.is_empty() {
         println!("# Environment variables:");
-        for (key, val) in &profile.environment {
-            println!("export {}={}", key.to_uppercase(), shell_escape(val));
+        for (key, value) in &profile.environment {
+            println!(
+                "export {}={}",
+                key.to_uppercase(),
+                shell_escape(&decrypt_value(private_key, value))
+            );
         }
         println!();
     }
@@ -174,13 +181,13 @@ pub fn dump_profile(profile_name: &str) -> anyhow::Result<()> {
         ));
     }
     for (name, value) in &profile.secret {
-        cmds.push(convert_secret_to_sql(name, value));
+        cmds.push(convert_secret_to_sql(private_key, name, value));
     }
     for (name, value) in &profile.bucket {
-        cmds.push(convert_bucket_to_sql(name, value));
+        cmds.push(convert_bucket_to_sql(private_key, name, value));
     }
     for (name, db) in &profile.attached {
-        cmds.push(convert_attached_db_to_sql(name, db));
+        cmds.push(convert_attached_db_to_sql(private_key, name, db));
     }
     for (name, lake) in &profile.ducklake {
         cmds.push(convert_ducklake_to_sql(name, lake));
