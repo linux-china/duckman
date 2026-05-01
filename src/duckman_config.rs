@@ -70,6 +70,8 @@ pub fn duckman_home_dir() -> PathBuf {
 /// Top-level structure of ~/.duckdb/duckman-example.toml
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct DuckmanConfig {
+    #[serde(skip_serializing)]
+    public_key: Option<String>,
     #[serde(default)]
     pub default: Option<String>,
     #[serde(default)]
@@ -219,7 +221,15 @@ impl DuckmanConfig {
     pub fn load_from<P: AsRef<Path>>(config_file: P) -> anyhow::Result<Self> {
         if config_file.as_ref().exists() {
             let content = fs::read_to_string(&config_file)?;
-            Ok(toml::from_str(&content)?)
+            let mut config: DuckmanConfig = toml::from_str(&content)?;
+            if let Some(offset) = content.find("dotenv.public.key") {
+                let remain = &content[offset + 17..];
+                if let Some(offset2) = remain.find('\n') {
+                    let pub_key = &remain[..offset2].replace(&['=', '"', '\'', ' '], "");
+                    config.public_key = Some(pub_key.to_owned());
+                }
+            }
+            Ok(config)
         } else {
             Ok(DuckmanConfig {
                 ..Default::default()
@@ -251,6 +261,7 @@ impl DuckmanConfig {
     }
 
     pub fn save(&self) -> anyhow::Result<()> {
+        use toml_edit::{DocumentMut, value};
         let home = Self::home_dir();
         fs::create_dir_all(&home)?;
         let content = toml::to_string_pretty(self)?;
