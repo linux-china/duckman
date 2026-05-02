@@ -12,12 +12,13 @@ Features:
 3. Run duckdb with a specific version of DuckDB and profile
 4. Extension Manager: install/uninstall/update/migrate extensions
 5. Profile Manager: secrets, S3, required extensions etc.
-6. MotherDuck integration
-7. DuckLake integration
-8. Iceberg integration
-9. dotenv support: `.env` autoload into environment variables for `getenv('XXX')`
-10. Duckman shim: a wrapper for DuckDB executable, it is used to switch DuckDB version and profile
-11. [dotenvx-rs](https://github.com/linux-china/dotenvx-rs) integration
+6. Snippet manager: save/load snippets from `~/.duckdb/snippets`
+7. MotherDuck integration
+8. DuckLake integration
+9. Iceberg integration
+10. dotenv support: `.env` autoload into environment variables for `getenv('XXX')`
+11. Duckman shim: a wrapper for DuckDB executable, it is used to switch DuckDB version and profile
+12. [dotenvx-rs](https://github.com/linux-china/dotenvx-rs) integration to encrypt sensitive data in duckman.toml
 
 ## profiles
 
@@ -87,6 +88,24 @@ $ duckman install ~/Downloads/duckdb
 ```
 $ duckman install system
 ```
+
+### How to manage snippets?
+
+Create snippet Markdown file under `~/.duckdb/snippets` directory, and content as following:
+
+~~~markdown
+---
+summary: Filter column names using a pattern
+tags: [sql]
+---
+
+```sql
+-- select only the column names that start with the dim_
+SELECT COLUMNS('^dim_') FROM fact_table;
+```
+~~~
+
+Then use `duckman snippet list` or `duckman snippet show <name>` to list or show snippet.
 
 ### How does Duckman choose profile?
 
