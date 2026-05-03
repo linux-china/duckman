@@ -154,3 +154,39 @@ pub fn show_snippet(name: &str) -> anyhow::Result<()> {
 
     Ok(())
 }
+
+pub fn edit_snippet(name: &str) -> anyhow::Result<()> {
+    let dir = DuckmanConfig::snippets_dir();
+    fs::create_dir_all(&dir)?;
+    let path = dir.join(format!("{}.md", name));
+
+    if !path.exists() {
+        fs::write(
+            &path,
+            format!(
+                "---\nsummary: \ntags: []\n---\n\n```sql\n-- {}\n```\n",
+                name
+            ),
+        )?;
+        println!("Created new snippet: {}", name.green());
+    }
+
+    let editor = std::env::var("EDITOR").unwrap_or_else(|_| {
+        if cfg!(windows) {
+            "notepad".to_string()
+        } else {
+            "vi".to_string()
+        }
+    });
+
+    let status = std::process::Command::new(&editor)
+        .arg(&path)
+        .status()
+        .map_err(|e| anyhow::anyhow!("Failed to launch editor '{}': {}", editor, e))?;
+
+    if !status.success() {
+        anyhow::bail!("Editor exited with status: {}", status);
+    }
+
+    Ok(())
+}

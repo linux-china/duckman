@@ -149,11 +149,21 @@ pub fn build_duckman_app() -> Command {
             .num_args(1)
             .required(true),
     );
+    let snippet_edit = Command::new("edit")
+        .about("Edit or create a snippet")
+        .arg(
+            Arg::new("name")
+                .help("Snippet name (filename without .md)")
+                .index(1)
+                .num_args(1)
+                .required(true),
+        );
     let snippet_command = Command::new("snippet")
         .about("Manage DuckDB snippets")
         .subcommand_required(true)
         .subcommand(snippet_list)
-        .subcommand(snippet_show);
+        .subcommand(snippet_show)
+        .subcommand(snippet_edit);
     Command::new("duckman")
         .version(VERSION)
         .author("linux_china <libing.chen@gmail.com>")

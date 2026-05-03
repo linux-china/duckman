@@ -106,6 +106,10 @@ async fn main() -> anyhow::Result<()> {
                 let name = sm.get_one::<String>("name").unwrap();
                 snippet_commands::show_snippet(name)?;
             }
+            Some(("edit", sm)) => {
+                let name = sm.get_one::<String>("name").unwrap();
+                snippet_commands::edit_snippet(name)?;
+            }
             _ => unreachable!(),
         },
         Some(("completion", sub_command_matches)) => {
