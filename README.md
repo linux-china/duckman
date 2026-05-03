@@ -12,7 +12,7 @@ Features:
 3. Run duckdb with a specific version of DuckDB and profile
 4. Extension Manager: install/uninstall/update/migrate extensions
 5. Profile Manager: secrets, S3, required extensions etc.
-6. Snippet manager: save/load snippets from `~/.duckdb/snippets`
+6. Snippet manager: new/edit/list snippets from `~/.duckdb/snippets`
 7. MotherDuck integration
 8. DuckLake integration
 9. Iceberg integration
@@ -149,6 +149,12 @@ type = "iceberg"
 path = "warehouse"
 options = { SECRET = "iceberg_secret", ENDPOINT = "https://rest_endpoint.com" }
 ```
+
+### How to manage snippets?
+
+- `duckman snippet edit <name>`: edit/create snippet
+- `duckman snippet list`: list all snippets
+- `duckman snippet show <name>`: show snippet
 
 # References
 
