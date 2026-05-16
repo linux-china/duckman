@@ -137,6 +137,30 @@ MOTHERDUCK_TOKEN = "xxxx"
 path = "md:mydb"
 ```
 
+### How to add Quack server support
+
+Add `quack` extension and init_sql to start quack server.
+
+```toml
+# profile of polyglot
+[profile.polyglot]
+description = "profile name"
+duckdb_version = "v1.5.2"
+extensions = ["parquet","quack"]
+init_sql = '''
+CALL quack_serve('quack:0.0.0.0:9494', token = 'super_secret', allow_other_hostname => true);
+'''
+```
+
+### How to add Quack client support?
+
+```toml
+[profile.analytics.attached.remote_db]
+type = "quack"
+path = "quack:localhost"
+options = { TOKEN = "super_secret" }
+```
+
 ### How to add Iceberg support?
 
 ```toml
