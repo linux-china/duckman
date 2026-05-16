@@ -9,13 +9,14 @@ use toml::Value;
 pub const CORE_EXTENSIONS_CSV: &str = include_str!("resources/core_extensions.csv");
 pub const COMMUNITY_EXTENSIONS_CSV: &str = include_str!("resources/community_extensions.csv");
 
-pub const DUCKDB_CORE_EXTENSIONS: [&str; 37] = [
+pub const DUCKDB_CORE_EXTENSIONS: [&str; 38] = [
     "autocomplete",
     "avro",
     "aws",
     "azure",
     "delta",
     "ducklake",
+    "quack",
     "encodings",
     "excel",
     "fts",
