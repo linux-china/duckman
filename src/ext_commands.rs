@@ -99,10 +99,12 @@ pub async fn install_extension(name: &str) -> anyhow::Result<()> {
     let config = &DuckmanConfig::load()?;
     let duckdb = find_duckdb_binary()?;
     let duckdb_version = config.get_duckdb_version(&None);
-    let sql = if DUCKDB_CORE_EXTENSIONS.contains(&name) {
-        format!("install {}", name)
+    let sql = if "quack" == name {
+        "INSTALL quack FROM core_nightly".to_string()
+    } else if DUCKDB_CORE_EXTENSIONS.contains(&name) {
+        format!("INSTALL {}", name)
     } else {
-        format!("install {} from community", name)
+        format!("INSTALL {} FROM community", name)
     };
     println!(
         "Begin to install extension {} for DuckDB {}",
