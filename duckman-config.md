@@ -1,6 +1,7 @@
 # duckman Configuration Guide
 
-Configuration file location: **`$HOME/.duckdb/duckman.toml`**
+Configuration file location:  **`./duckman.toml`** and **`$HOME/.duckdb/duckman.toml`**, 
+and local config will override global config.
 
 ---
 
