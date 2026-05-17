@@ -69,7 +69,7 @@ pub fn duckman_home_dir() -> PathBuf {
         .join(".duckdb")
 }
 
-/// Top-level structure of ~/.duckdb/duckman-example.toml
+/// Top-level structure of ~/.duckdb/duckman.toml
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct DuckmanConfig {
     #[serde(skip_serializing)]
