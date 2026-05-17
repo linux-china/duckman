@@ -234,6 +234,10 @@ impl DuckmanConfig {
         buf.exists()
     }
 
+    pub fn load_global() -> anyhow::Result<Self> {
+        Ok(Self::load_from(Self::config_file())?)
+    }
+
     pub fn load() -> anyhow::Result<Self> {
         let mut global_config = Self::load_from(Self::config_file())?;
         // stamp global scope on all profiles from the home config

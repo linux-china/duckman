@@ -186,8 +186,8 @@ pub async fn install_version(version: &str) -> anyhow::Result<()> {
         return install_from_path(version).await;
     }
     if version == "system" {
-        let path = which::which("duckdb")
-            .map_err(|_| anyhow::anyhow!("duckdb not found in PATH"))?;
+        let path =
+            which::which("duckdb").map_err(|_| anyhow::anyhow!("duckdb not found in PATH"))?;
         return install_from_path(path.to_str().unwrap()).await;
     }
     let version = normalize_duckdb_version(version);
@@ -384,7 +384,7 @@ pub fn set_default_version(version: &str) -> anyhow::Result<()> {
             version
         );
     }
-    let mut config = DuckmanConfig::load()?;
+    let mut config = DuckmanConfig::load_global()?;
     config.set_default(&version);
     config.save()?;
     println!("Default DuckDB version set to {}.", version.green());
