@@ -95,6 +95,8 @@ impl DuckmanConfig {
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct Profile {
+    #[serde(skip_serializing)]
+    pub scope: Option<String>,
     pub description: Option<String>,
     pub duckdb_version: Option<String>,
     pub init_sql: Option<String>,
@@ -234,9 +236,21 @@ impl DuckmanConfig {
 
     pub fn load() -> anyhow::Result<Self> {
         let mut global_config = Self::load_from(Self::config_file())?;
+        // stamp global scope on all profiles from the home config
+        if let Some(profiles) = global_config.profile.as_mut() {
+            for profile in profiles.values_mut() {
+                profile.scope = Some("global".to_string());
+            }
+        }
         let local_file = Path::new("duckman.toml");
         if local_file.exists() {
-            let local_config = Self::load_from(local_file)?;
+            let mut local_config = Self::load_from(local_file)?;
+            // stamp local scope on all profiles from the local config
+            if let Some(profiles) = local_config.profile.as_mut() {
+                for profile in profiles.values_mut() {
+                    profile.scope = Some("local".to_string());
+                }
+            }
             // local default takes priority
             if local_config.default.is_some() {
                 global_config.default = local_config.default;

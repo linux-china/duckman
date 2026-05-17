@@ -22,7 +22,12 @@ pub fn list_profiles() -> anyhow::Result<()> {
 
     for (name, profile) in profiles {
         // ── header ────────────────────────────────────────────────────────────
-        print!("  {}", name.green().bold());
+        let scope = if let Some(scope) = &profile.scope {
+            format!("({})", scope)
+        } else {
+            "".to_string()
+        };
+        print!("  {}{}", name.green().bold(), scope.cyan().bold());
         if let Some(desc) = &profile.description {
             print!("  {}", desc.dimmed());
         }
