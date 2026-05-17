@@ -233,8 +233,23 @@ impl DuckmanConfig {
     }
 
     pub fn load() -> anyhow::Result<Self> {
-        let config_file = Self::config_file();
-        Self::load_from(config_file)
+        let mut global_config = Self::load_from(Self::config_file())?;
+        let local_file = Path::new("duckman.toml");
+        if local_file.exists() {
+            let local_config = Self::load_from(local_file)?;
+            // local default takes priority
+            if local_config.default.is_some() {
+                global_config.default = local_config.default;
+            }
+            // merge profiles: local entries override global ones
+            if let Some(local_profiles) = local_config.profile {
+                let merged = global_config.profile.get_or_insert_with(HashMap::new);
+                for (name, profile) in local_profiles {
+                    merged.insert(name, profile);
+                }
+            }
+        }
+        Ok(global_config)
     }
 
     pub fn load_from<P: AsRef<Path>>(config_file: P) -> anyhow::Result<Self> {
@@ -531,7 +546,7 @@ mod tests {
 
     #[test]
     fn test_load_from() -> TestResult {
-        let config = DuckmanConfig::load_from("duckman-example.toml")?;
+        let config = DuckmanConfig::load_from("../duckman.toml")?;
         println!("{:?}", config);
         println!("{:#?}", config.get_private_key());
         Ok(())
@@ -539,7 +554,7 @@ mod tests {
 
     #[test]
     fn test_load_profiles() -> TestResult {
-        let config = DuckmanConfig::load_from("duckman-example.toml")?;
+        let config = DuckmanConfig::load_from("../duckman.toml")?;
         for entry in config.get_profiles() {
             println!("{}", entry.0);
             println!("{:?}", entry.1);
@@ -549,7 +564,7 @@ mod tests {
 
     #[test]
     fn test_secrets() -> TestResult {
-        let config = DuckmanConfig::load_from("duckman-example.toml")?;
+        let config = DuckmanConfig::load_from("../duckman.toml")?;
         let default_profile = config.get_profiles().get("default").unwrap();
         for (key, value) in default_profile.secret.iter() {
             println!("{}", key);
@@ -560,7 +575,7 @@ mod tests {
 
     #[test]
     fn test_buckets() -> TestResult {
-        let config = DuckmanConfig::load_from("duckman-example.toml")?;
+        let config = DuckmanConfig::load_from("../duckman.toml")?;
         let default_profile = config.get_profiles().get("default").unwrap();
         for (key, value) in default_profile.bucket.iter() {
             println!("{}", key);
