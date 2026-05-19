@@ -101,6 +101,7 @@ pub struct Profile {
     pub duckdb_version: Option<String>,
     pub init_sql: Option<String>,
     pub parquet_key: Option<String>,
+    pub settings: Option<toml::Table>,
     #[serde(default)]
     pub extensions: Vec<String>,
     #[serde(default)]
@@ -418,7 +419,7 @@ pub fn convert_ducklake_to_sql(name: &str, db: &DuckLake) -> String {
     )
 }
 
-fn convert_toml_value_to_sql_value(private_key: &Option<String>, value: &Value) -> String {
+pub fn convert_toml_value_to_sql_value(private_key: &Option<String>, value: &Value) -> String {
     match value {
         Value::String(s) => {
             format!("'{}\'", decrypt_value(private_key, s.as_str()))
@@ -491,6 +492,15 @@ pub fn inject_profile(
                 .iter()
                 .map(|(k, v)| (k.to_uppercase(), decrypt_value(private_key, v))),
         );
+    }
+    // settings
+    if let Some(settings) = &profile.settings {
+        for (key, value) in settings {
+            let sql_value = convert_toml_value_to_sql_value(private_key, value);
+            let sql = format!("SET {} = {};", key, sql_value);
+            args.push("-cmd".to_owned());
+            args.push(sql);
+        }
     }
     // secrets
     for (name, value) in profile.secret.iter() {

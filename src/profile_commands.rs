@@ -1,6 +1,6 @@
 use crate::duckman_config::{
     DUCKDB_CORE_EXTENSIONS, DuckmanConfig, convert_attached_db_to_sql, convert_bucket_to_sql,
-    convert_ducklake_to_sql, convert_secret_to_sql, decrypt_value,
+    convert_ducklake_to_sql, convert_secret_to_sql, convert_toml_value_to_sql_value, decrypt_value,
 };
 use colored::Colorize;
 
@@ -51,6 +51,15 @@ pub fn list_profiles() -> anyhow::Result<()> {
                 .map(|(k, v)| format!("{}={}", k.to_uppercase(), v))
                 .collect();
             println!("    env:         {}", vars.join("  "));
+        }
+
+        // ── settings ──────────────────────────────────────────────────────
+        if let Some(settings) = &profile.settings {
+            let vars: Vec<String> = settings
+                .iter()
+                .map(|(k, v)| format!("{}={}", k.to_uppercase(), v))
+                .collect();
+            println!("    settings:         {}", vars.join("  "));
         }
 
         // ── secrets ───────────────────────────────────────────────────────────
@@ -176,6 +185,13 @@ pub fn dump_profile(profile_name: &str) -> anyhow::Result<()> {
     // collect -cmd arguments
     let mut cmds: Vec<String> = Vec::new();
 
+    // settings
+    if let Some(settings) = &profile.settings {
+        for (key, value) in settings {
+            let sql_value = convert_toml_value_to_sql_value(private_key, value);
+            cmds.push(format!("SET {} = {};", key, sql_value));
+        }
+    }
     for ext in &profile.extensions {
         cmds.push(format!("load {};", ext));
     }
