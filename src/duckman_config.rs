@@ -468,6 +468,13 @@ pub fn inject_profile(
     new_env: &mut HashMap<String, String>,
     private_key: &Option<String>,
 ) {
+    // Suppression for `--cmd` sentences
+    args.push("--cmd".to_string());
+    if !cfg!(target_os = "windows") {
+        args.push(".output NUL".to_string());
+    } else {
+        args.push(".output /dev/null".to_string());
+    }
     // load or install extensions
     for ext_name in profile.extensions.iter() {
         if !DuckmanConfig::is_ext_installed(duckdb_version, ext_name) {
@@ -541,6 +548,9 @@ pub fn inject_profile(
             args.push(sql);
         }
     }
+    // Suppression for `--cmd` sentences
+    args.push("--cmd".to_string());
+    args.push(".output".to_string());
 }
 
 pub fn normalize_duckdb_version(version: &str) -> String {
