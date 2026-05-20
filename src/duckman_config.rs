@@ -470,7 +470,7 @@ pub fn inject_profile(
 ) {
     // Suppression for `--cmd` sentences
     args.push("--cmd".to_string());
-    if !cfg!(target_os = "windows") {
+    if cfg!(target_os = "windows") {
         args.push(".output NUL".to_string());
     } else {
         args.push(".output /dev/null".to_string());
