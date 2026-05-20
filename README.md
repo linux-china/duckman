@@ -25,6 +25,7 @@ Features:
 Profile is a collection of settings to run DuckDB.
 
 - basic info: name, description, DuckDB version
+- settings: `set` sentences from [Pragmas](https://duckdb.org/docs/current/configuration/pragmas)
 - required extensions
 - secrets
 - environment variables
