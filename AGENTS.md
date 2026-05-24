@@ -22,18 +22,18 @@ Commands:
   uninstall   Uninstall DuckDB
   run         Run a specific version of DuckDB
   default     Set a version of DuckDB as default one to use
+  which       Print the absolute path of a DuckDB binary
+  count       Count installed DuckDB versions and extensions(数鸭子)
   ext         Manage DuckDB extensions
-  extension   Manage DuckDB extensions
   profile     Manage profiles
+  snippet     Manage DuckDB snippets
   completion  Output auto-completion script for bash/zsh/fish/powershell
   help        Print this message or the help of the given subcommand(s)
 
-Flags:
-  -d, --duckdb <duckdb>  DuckDB version
+Options:
+  -d, --duckdb <duckdb>  Specify a DuckDB version or DUCKDB_VERSION env variable
   -h, --help             Print help
   -V, --version          Print version
-
-Use "duckman [command] --help" for more information about a command.
 ```
 
 ## Duckman config
