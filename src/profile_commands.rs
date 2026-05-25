@@ -84,7 +84,7 @@ pub fn list_profiles() -> anyhow::Result<()> {
             let names: Vec<&str> = profile
                 .bucket
                 .iter()
-                .map(|(name, value)| name.as_str())
+                .map(|(name, _value)| name.as_str())
                 .collect();
             println!("    storage buckets:  {}", names.join(", "));
         }

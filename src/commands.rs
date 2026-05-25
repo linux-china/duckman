@@ -1,5 +1,5 @@
 use crate::duckman_app::build_duckman_app;
-use crate::duckman_config::{DuckmanConfig, inject_profile, normalize_duckdb_version};
+use crate::duckman_config::{DuckmanConfig, normalize_duckdb_version};
 use crate::github;
 use crate::runner::duckdb_execute;
 use clap::ArgMatches;

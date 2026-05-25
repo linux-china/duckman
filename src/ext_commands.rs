@@ -3,7 +3,6 @@ use crate::duckman_config::{
     normalize_duckdb_version,
 };
 use colored::Colorize;
-use futures_util::StreamExt;
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;

@@ -1,6 +1,5 @@
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use std::ascii::AsciiExt;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
@@ -579,7 +578,6 @@ fn duckdb_platform_id() -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::stdout;
     use testresult::TestResult;
 
     #[test]
