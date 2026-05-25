@@ -1,0 +1,5 @@
+- name: Install LLVM (Windows)
+  if: runner.os == 'Windows'
+  run: |
+    choco install llvm -y
+    echo "LIBCLANG_PATH=C:\Program Files\LLVM\bin" >> $env:GITHUB_ENV
