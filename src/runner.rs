@@ -67,8 +67,8 @@ pub fn duckdb_execute(
     #[cfg(not(unix))]
     {
         let status = std::process::Command::new(&binary)
-            .args(&extra_args)
-            .envs(&new_extra_args)
+            .args(&new_extra_args)
+            .envs(&new_env)
             .status()?;
         std::process::exit(status.code().unwrap_or(1));
     }
