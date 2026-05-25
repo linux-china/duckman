@@ -1,6 +1,6 @@
 use clap::{Arg, ArgAction, Command};
 
-pub const VERSION: &str = "0.1.3";
+pub const VERSION: &str = "0.1.4";
 
 pub fn build_duckman_app() -> Command {
     let run_command = Command::new("run")
