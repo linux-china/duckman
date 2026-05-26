@@ -101,6 +101,7 @@ pub struct Profile {
     pub init_sql: Option<String>,
     pub parquet_key: Option<String>,
     pub settings: Option<toml::Table>,
+    pub quack_server: Option<QuackServer>,
     #[serde(default)]
     pub extensions: Vec<String>,
     #[serde(default)]
@@ -137,6 +138,35 @@ pub struct AttachedDb {
     pub db_path: String,
     pub sql: Option<String>,
     pub options: Option<toml::Table>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct QuackServer {
+    pub uri: String,
+    pub token: Option<String>,
+    pub allow_other_hostname: Option<bool>,
+    pub disable_ssl: Option<bool>,
+}
+
+impl QuackServer {
+    pub fn sql_to_start_server(&self) -> String {
+        let mut sql = "call quack_server(".to_owned();
+        sql.push_str(self.uri.as_str());
+        if let Some(token) = &self.token {
+            sql.push_str(&format!(", token = '{}'", token));
+        }
+        if let Some(allow_other_hostname) = &self.allow_other_hostname {
+            sql.push_str(&format!(
+                ", allow_other_hostname => {}",
+                allow_other_hostname
+            ));
+            if let Some(disable_ssl) = &self.disable_ssl {
+                sql.push_str(&format!(", disable_ssl => {}", disable_ssl));
+            }
+        }
+        sql.push(')');
+        sql
+    }
 }
 
 impl AttachedDb {
@@ -538,6 +568,13 @@ pub fn inject_profile(
         let sql = convert_ducklake_to_sql(name, ducklake);
         args.push("-cmd".to_owned());
         args.push(sql);
+    }
+    // quack server
+    if let Some(quack_server) = &profile.quack_server {
+        args.push("-cmd".to_owned());
+        args.push("load quack".to_owned());
+        args.push("-cmd".to_owned());
+        args.push(quack_server.sql_to_start_server());
     }
     // init sql
     if let Some(init_sql) = &profile.init_sql {
