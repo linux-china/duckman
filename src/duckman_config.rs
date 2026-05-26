@@ -1,7 +1,6 @@
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fmt::format;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 use toml::Value;
@@ -147,6 +146,41 @@ pub struct QuackServer {
     pub token: Option<String>,
     pub allow_other_hostname: Option<bool>,
     pub disable_ssl: Option<bool>,
+    pub whoami: Option<QuackServerWhoami>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct QuackServerWhoami {
+    pub name: Option<String>,
+    pub provider: Option<String>,
+    pub hostname: Option<String>,
+    pub region: Option<String>,
+    pub meta: Option<String>,
+}
+
+impl QuackServerWhoami {
+    pub fn get_sql(&self) -> String {
+        let mut sql = "call quack_identify(".to_owned();
+        let mut pairs: Vec<String> = vec![];
+        if let Some(name) = &self.name {
+            pairs.push(format!("name = '{}'", name));
+        }
+        if let Some(provider) = &self.provider {
+            pairs.push(format!("provider = '{}'", provider));
+        }
+        if let Some(hostname) = &self.hostname {
+            pairs.push(format!("hostname = '{}'", hostname));
+        }
+        if let Some(region) = &self.region {
+            pairs.push(format!("region = '{}'", region));
+        }
+        if let Some(meta) = &self.meta {
+            pairs.push(format!("meta = '{}'", meta));
+        }
+        sql.push_str(&pairs.join(", "));
+        sql.push_str(")");
+        sql
+    }
 }
 
 impl QuackServer {
@@ -155,7 +189,7 @@ impl QuackServer {
             return uri.to_string();
         }
         if let Some(allow_other_hostname) = self.allow_other_hostname {
-            if (allow_other_hostname) {
+            if allow_other_hostname {
                 return "quack:0.0.0.0:9494".to_owned();
             }
         }
@@ -586,6 +620,10 @@ pub fn inject_profile(
         args.push("load quack".to_owned());
         args.push("-cmd".to_owned());
         args.push(quack_server.sql_to_start_server());
+        if let Some(whoami) = &quack_server.whoami {
+            args.push("-cmd".to_owned());
+            args.push(whoami.get_sql());
+        }
     }
     // init sql
     if let Some(init_sql) = &profile.init_sql {
