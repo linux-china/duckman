@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
+use std::fmt::format;
 use toml::Value;
 
 pub const CORE_EXTENSIONS_CSV: &str = include_str!("resources/core_extensions.csv");
@@ -150,8 +151,7 @@ pub struct QuackServer {
 
 impl QuackServer {
     pub fn sql_to_start_server(&self) -> String {
-        let mut sql = "call quack_server(".to_owned();
-        sql.push_str(self.uri.as_str());
+        let mut sql = format!("call quack_serve('{}'", self.uri);
         if let Some(token) = &self.token {
             sql.push_str(&format!(", token = '{}'", token));
         }
