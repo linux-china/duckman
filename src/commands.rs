@@ -224,7 +224,7 @@ pub async fn uninstall_version(version: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn run_duckdb(profile: Option<&str>, extra_args: Vec<String>) -> anyhow::Result<()> {
+pub async fn run_duckdb(profile: Option<&str>, extra_args: Vec<String>) -> anyhow::Result<()> {
     let config = DuckmanConfig::load()?;
 
     // Version resolution: explicit arg > DUCKDB_VERSION env > config default
@@ -245,6 +245,7 @@ pub fn run_duckdb(profile: Option<&str>, extra_args: Vec<String>) -> anyhow::Res
         &duckdb_profile,
         extra_args,
     )
+    .await
 }
 
 pub fn which_duckdb(version: Option<&str>) -> anyhow::Result<()> {

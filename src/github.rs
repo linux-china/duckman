@@ -1,5 +1,4 @@
 use crate::duckman_config::DuckmanConfig;
-use crate::github;
 use anyhow::bail;
 use futures_util::StreamExt;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -32,7 +31,7 @@ impl GitHubRelease {
 pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
     // Fetch release metadata from GitHub
     println!("Fetching release info for {}...", version);
-    let release = github::fetch_release(&version).await?;
+    let release = fetch_release(&version).await?;
     let release = match release {
         Some(r) => r,
         None => {

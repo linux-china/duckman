@@ -1,14 +1,18 @@
 use crate::duckman_config::{DuckmanConfig, inject_profile};
+use duckman::github::download_duckdb;
 use std::collections::HashMap;
 use std::env;
 
-pub fn duckdb_execute(
+pub async fn duckdb_execute(
     config: &DuckmanConfig,
     duckdb_version: &str,
     duckdb_profile: &Option<String>,
     extra_args: Vec<String>,
 ) -> anyhow::Result<()> {
     let binary = DuckmanConfig::version_binary(&duckdb_version);
+    if !binary.exists() {
+        download_duckdb(duckdb_version).await?;
+    }
     if !binary.exists() {
         anyhow::bail!(
             "DuckDB {} is not installed. Run `duckman install {}` first.",
