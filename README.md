@@ -153,13 +153,9 @@ Add `quack` extension and init_sql to start quack server.
 
 ```toml
 # profile of polyglot
-[profile.polyglot]
-description = "profile name"
-duckdb_version = "v1.5.2"
-extensions = ["parquet","quack"]
-init_sql = '''
-CALL quack_serve('quack:0.0.0.0:9494', token = 'super_secret', allow_other_hostname => true);
-'''
+[profile.polyglot.quack_server]
+uri = "quack:localhost"
+token = "super_secret"
 ```
 
 ### How to add Quack client support?
