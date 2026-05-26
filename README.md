@@ -20,7 +20,16 @@ Features:
 11. Duckman shim: a wrapper for DuckDB executable, it is used to switch DuckDB version and profile
 12. [dotenvx-rs](https://github.com/linux-china/dotenvx-rs) integration to encrypt sensitive data in duckman.toml
 
-## profiles
+# Get started
+
+## Installation
+
+- Mac: `brew install linux-china/tap/duckman`
+- Cargo: `cargo binstall duckman`
+- Shell: `curl --proto '=https' --tlsv1.2 -LsSf https://github.com/linux-china/duckman/releases/download/v0.1.4/duckman-installer.sh | sh`
+- PowerShell: `powershell -ExecutionPolicy Bypass -c "irm https://github.com/linux-china/duckman/releases/download/v0.1.4/duckman-installer.ps1 | iex"`
+
+# profiles
 
 Profile is a collection of settings to run DuckDB.
 
