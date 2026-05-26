@@ -1,9 +1,9 @@
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fmt::format;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
-use std::fmt::format;
 use toml::Value;
 
 pub const CORE_EXTENSIONS_CSV: &str = include_str!("resources/core_extensions.csv");
@@ -143,15 +143,26 @@ pub struct AttachedDb {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct QuackServer {
-    pub uri: String,
+    pub uri: Option<String>,
     pub token: Option<String>,
     pub allow_other_hostname: Option<bool>,
     pub disable_ssl: Option<bool>,
 }
 
 impl QuackServer {
+    pub fn get_uri(&self) -> String {
+        if let Some(uri) = &self.uri {
+            return uri.to_string();
+        }
+        if let Some(allow_other_hostname) = self.allow_other_hostname {
+            if (allow_other_hostname) {
+                return "quack:0.0.0.0:9494".to_owned();
+            }
+        }
+        "quack:localhost".to_owned()
+    }
     pub fn sql_to_start_server(&self) -> String {
-        let mut sql = format!("call quack_serve('{}'", self.uri);
+        let mut sql = format!("call quack_serve('{}'", self.get_uri());
         if let Some(token) = &self.token {
             sql.push_str(&format!(", token = '{}'", token));
         }
