@@ -195,7 +195,7 @@ impl QuackServer {
             return format!("quack://{bind_addr}:{port}");
         }
         if let Some(port) = &self.port {
-            let bind_addr = &self.bind_address.unwrap_or("localhost".to_string());
+            let bind_addr = &self.bind_address.clone().unwrap_or("localhost".to_string());
             return format!("quack://{bind_addr}:{port}");
         }
         if let Some(allow_other_hostname) = self.allow_other_hostname {
