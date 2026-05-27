@@ -158,6 +158,16 @@ uri = "quack:localhost"
 token = "super_secret"
 ```
 
+You can add information for `from whoami()`: 
+
+```toml
+# profile of polyglot
+[profile.polyglot.quack_server]
+uri = "quack:localhost"
+token = "super_secret"
+whoami = { name = "quack_server", provider = "xxx", region = "xxxx" }
+```
+
 ### How to add Quack client support?
 
 ```toml
