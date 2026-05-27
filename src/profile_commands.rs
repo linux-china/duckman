@@ -213,6 +213,9 @@ pub fn dump_profile(profile_name: &str) -> anyhow::Result<()> {
     for (name, lake) in &profile.ducklake {
         cmds.push(convert_ducklake_to_sql(name, lake));
     }
+    if let Some(quack_server) = &profile.quack_server {
+        cmds.push(format!("{};", quack_server.sql_to_start_server()));
+    }
 
     if !cmds.is_empty() {
         println!();
