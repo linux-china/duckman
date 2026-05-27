@@ -52,10 +52,7 @@ SCOPE = 's3://oss-bucket'
 [profile.polyglot]
 description = "Add different files support"
 duckdb_version = "v1.5.2"
-extensions = ["parquet", "excel","quack"]
-init_sql = '''
-CALL quack_serve('quack:0.0.0.0:9494', allow_other_hostname => true);
-'''
+extensions = ["parquet", "excel", "quack"]
 
 [profile.polyglot.environment]
 nick = "Jackie"
