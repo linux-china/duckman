@@ -206,7 +206,8 @@ impl QuackServer {
         "quack:localhost".to_owned()
     }
     pub fn sql_to_start_server(&self) -> String {
-        let mut sql = format!("call quack_serve('{}'", self.get_uri());
+        let quack_uri = self.get_uri();
+        let mut sql = format!("call quack_serve('{}'", quack_uri);
         if let Some(token) = &self.token {
             sql.push_str(&format!(", token = '{}'", token));
         }
@@ -218,6 +219,8 @@ impl QuackServer {
             if let Some(disable_ssl) = &self.disable_ssl {
                 sql.push_str(&format!(", disable_ssl => {}", disable_ssl));
             }
+        } else if quack_uri.contains("0.0.0.0") {
+            sql.push_str(", allow_other_hostname => true");
         }
         sql.push(')');
         sql
