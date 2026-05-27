@@ -79,6 +79,10 @@ pub fn list_profiles() -> anyhow::Result<()> {
             println!("    secrets:     {}", labels.join(", "));
         }
 
+        // ── quack server ──────────────────────────────────────────────────────
+        if let Some(quack_server) = &profile.quack_server {
+            println!("    quack server: {}", quack_server.get_uri());
+        }
         // ── storage buckets ────────────────────────────────────────────────────────
         if !profile.bucket.is_empty() {
             let names: Vec<&str> = profile
