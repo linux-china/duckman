@@ -1,6 +1,6 @@
 # duckman Configuration Guide
 
-Configuration file location:  **`./duckman.toml`** and **`$HOME/.duckdb/duckman.toml`**, 
+Configuration file location:  **`./duckman.toml`** and **`$HOME/.duckdb/duckman.toml`**,
 and local config will override global config.
 
 ---
@@ -89,6 +89,40 @@ DUCKDB_NO_UNSIGNED_EXTENSIONS = "1"
 ```
 
 Translates to shell environment: `AWS_DEFAULT_REGION=us-east-1 duckdb ...`
+
+---
+
+### quack server
+
+You can add Quack server support to your profile with the `quack_server` field.
+
+```toml
+[profile.default.quack_server]
+uri = "quack:localhost"
+token = "super_secret"
+```
+
+QuackServer configuration:
+
+| Field                | Type               | Description                       |
+|----------------------|--------------------|-----------------------------------|
+| uri                  | String?            | The full URI for the quack server |
+| bind_address         | String?            | The address to bind the server to |
+| port                 | Int?               | The port number                   |
+| token                | String?            | Authentication token              |
+| allow_other_hostname | Bool?              | Whether to allow other hostnames  |
+| disable_ssl          | Bool?              | Whether to disable SSL            |
+| whoami               | QuackServerWhoami? | Server identity configuration     |
+
+QuackServer identity (whoami) configuration:
+
+| Field    | Type    | Description         |
+|----------|---------|---------------------|
+| name     | String? | The server name     |
+| provider | String? | The provider name   |
+| hostname | String? | The hostname        |
+| region   | String? | The region          |
+| meta     | String? | Additional metadata |
 
 ---
 
