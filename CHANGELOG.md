@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+
+## [0.1.5] - 2026-05-27
+
+- Add quack server support
+- Bug fix
+
 ## [0.1.4] - 2026-05-25
 
 Core features:
