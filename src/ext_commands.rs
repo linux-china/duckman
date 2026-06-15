@@ -44,18 +44,16 @@ fn list_local_extensions() -> anyhow::Result<()> {
         println!("Listing extensions for DuckDB {}", version.green());
     }
     let duckdb = find_duckdb_binary()?;
-    let output = Command::new(&duckdb)
+    let status = Command::new(&duckdb)
         .args([
             "-c",
             "select extension_name, installed, loaded, description FROM duckdb_extensions() where installed = true",
         ])
-        .output();
-    match output {
-        Ok(out) => {
-            if out.status.success() {
-                print!("{}", String::from_utf8_lossy(&out.stdout));
-            } else {
-                eprintln!("{}", String::from_utf8_lossy(&out.stderr));
+        .status();
+    match status {
+        Ok(s) => {
+            if !s.success() {
+                anyhow::bail!("duckdb exited with {}", s);
             }
         }
         Err(e) => anyhow::bail!("Failed to run duckdb ({}): {}", duckdb.display(), e),
@@ -288,15 +286,13 @@ pub fn migrate_extensions(from_version: &str) -> anyhow::Result<()> {
 
 pub fn update_extensions() -> anyhow::Result<()> {
     let duckdb = find_duckdb_binary()?;
-    let output = Command::new(&duckdb)
+    let status = Command::new(&duckdb)
         .args(["-c", "UPDATE EXTENSIONS"])
-        .output();
-    match output {
-        Ok(out) => {
-            if out.status.success() {
-                print!("{}", String::from_utf8_lossy(&out.stdout));
-            } else {
-                eprintln!("{}", String::from_utf8_lossy(&out.stderr));
+        .status();
+    match status {
+        Ok(s) => {
+            if !s.success() {
+                anyhow::bail!("duckdb exited with {}", s);
             }
         }
         Err(e) => anyhow::bail!("Failed to run duckdb ({}): {}", duckdb.display(), e),
