@@ -33,7 +33,7 @@ fn platform_asset_name() -> &'static str {
     if cfg!(target_os = "macos") {
         "duckdb_cli-osx-universal.zip"
     } else if cfg!(target_os = "linux") && cfg!(target_arch = "aarch64") {
-        "duckdb_cli-linux-aarch64.zip"
+        "duckdb_cli-linux-arm64.zip"
     } else if cfg!(target_os = "linux") {
         "duckdb_cli-linux-amd64.zip"
     } else if cfg!(target_os = "windows") {
