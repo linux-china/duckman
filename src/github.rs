@@ -5,6 +5,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 use serde::Deserialize;
 use std::fs;
 use std::io::Cursor;
+use std::os::unix::fs::PermissionsExt;
 
 #[derive(Debug, Deserialize)]
 pub struct GitHubRelease {
@@ -104,6 +105,10 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
             found = true;
             break;
         }
+    }
+    // make duckdb executable if unix
+    if found && cfg!(target_family = "unix") {
+        fs::set_permissions(&binary_path, fs::Permissions::from_mode(0o755))?;
     }
 
     if !found {
