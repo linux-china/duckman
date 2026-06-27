@@ -1,4 +1,4 @@
-use crate::duckman_config::{DuckmanConfig, duckman_home_dir};
+use crate::duckman_config::{DuckmanConfig};
 use colored::Colorize;
 use std::collections::HashMap;
 use std::fs;

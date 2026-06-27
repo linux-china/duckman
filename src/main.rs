@@ -10,7 +10,7 @@ mod duckman_config;
 mod ext_commands;
 mod github;
 mod profile_commands;
-mod runner;
+pub mod runner;
 mod snippet_commands;
 
 #[tokio::main]
@@ -49,7 +49,7 @@ async fn main() -> anyhow::Result<()> {
                 .skip(1)
                 .cloned()
                 .collect();
-            commands::run_duckdb(profile, extra_args)?;
+            commands::run_duckdb(profile, extra_args).await?;
         }
         Some(("which", m)) => {
             let version = m.get_one::<String>("version").map(|s| s.as_str());

@@ -7,7 +7,8 @@ use std::ffi::OsString;
 mod duckman_config;
 mod runner;
 
-fn main() -> anyhow::Result<()> {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     dotenvx_rs::dotenv().ok();
     let mut raw_args: Vec<OsString> = env::args_os().collect();
     // get shim command name
@@ -32,4 +33,5 @@ fn main() -> anyhow::Result<()> {
         &duckdb_profile,
         extra_args,
     )
+    .await
 }

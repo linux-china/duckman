@@ -1,6 +1,5 @@
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use std::ascii::AsciiExt;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
@@ -102,6 +101,7 @@ pub struct Profile {
     pub init_sql: Option<String>,
     pub parquet_key: Option<String>,
     pub settings: Option<toml::Table>,
+    pub quack_server: Option<QuackServer>,
     #[serde(default)]
     pub extensions: Vec<String>,
     #[serde(default)]
@@ -138,6 +138,93 @@ pub struct AttachedDb {
     pub db_path: String,
     pub sql: Option<String>,
     pub options: Option<toml::Table>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct QuackServer {
+    pub uri: Option<String>,
+    pub bind_address: Option<String>,
+    pub port: Option<u16>,
+    pub token: Option<String>,
+    pub allow_other_hostname: Option<bool>,
+    pub disable_ssl: Option<bool>,
+    pub whoami: Option<QuackServerWhoami>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct QuackServerWhoami {
+    pub name: Option<String>,
+    pub provider: Option<String>,
+    pub hostname: Option<String>,
+    pub region: Option<String>,
+    pub meta: Option<String>,
+}
+
+impl QuackServerWhoami {
+    pub fn get_sql(&self) -> String {
+        let mut sql = "call quack_identify(".to_owned();
+        let mut pairs: Vec<String> = vec![];
+        if let Some(name) = &self.name {
+            pairs.push(format!("name = '{}'", name));
+        }
+        if let Some(provider) = &self.provider {
+            pairs.push(format!("provider = '{}'", provider));
+        }
+        if let Some(hostname) = &self.hostname {
+            pairs.push(format!("hostname = '{}'", hostname));
+        }
+        if let Some(region) = &self.region {
+            pairs.push(format!("region = '{}'", region));
+        }
+        if let Some(meta) = &self.meta {
+            pairs.push(format!("meta = '{}'", meta));
+        }
+        sql.push_str(&pairs.join(", "));
+        sql.push_str(")");
+        sql
+    }
+}
+
+impl QuackServer {
+    pub fn get_uri(&self) -> String {
+        if let Some(uri) = &self.uri {
+            return uri.to_string();
+        }
+        if let Some(bind_addr) = &self.bind_address {
+            let port = self.port.unwrap_or(9494);
+            return format!("quack://{bind_addr}:{port}");
+        }
+        if let Some(port) = &self.port {
+            let bind_addr = &self.bind_address.clone().unwrap_or("localhost".to_string());
+            return format!("quack://{bind_addr}:{port}");
+        }
+        if let Some(allow_other_hostname) = self.allow_other_hostname {
+            if allow_other_hostname {
+                return "quack:0.0.0.0:9494".to_owned();
+            }
+        }
+        "quack:localhost".to_owned()
+    }
+    pub fn sql_to_start_server(&self) -> String {
+        let quack_uri = self.get_uri();
+        let mut sql = format!("call quack_serve('{}'", quack_uri);
+        if let Some(token) = &self.token {
+            sql.push_str(&format!(", token = '{}'", token));
+        }
+        if let Some(allow_other_hostname) = &self.allow_other_hostname {
+            sql.push_str(&format!(
+                ", allow_other_hostname => {}",
+                allow_other_hostname
+            ));
+            if let Some(disable_ssl) = &self.disable_ssl {
+                sql.push_str(&format!(", disable_ssl => {}", disable_ssl));
+            }
+        } else if quack_uri.contains("0.0.0.0") {
+            sql.push_str(", allow_other_hostname => true");
+        }
+        sql.push(')');
+        sql
+    }
 }
 
 impl AttachedDb {
@@ -540,6 +627,17 @@ pub fn inject_profile(
         args.push("-cmd".to_owned());
         args.push(sql);
     }
+    // quack server
+    if let Some(quack_server) = &profile.quack_server {
+        args.push("-cmd".to_owned());
+        args.push("load quack".to_owned());
+        args.push("-cmd".to_owned());
+        args.push(quack_server.sql_to_start_server());
+        if let Some(whoami) = &quack_server.whoami {
+            args.push("-cmd".to_owned());
+            args.push(whoami.get_sql());
+        }
+    }
     // init sql
     if let Some(init_sql) = &profile.init_sql {
         let sql = init_sql.replace("\n", " ").trim().to_string();
@@ -579,7 +677,6 @@ fn duckdb_platform_id() -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::stdout;
     use testresult::TestResult;
 
     #[test]

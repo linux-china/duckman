@@ -79,12 +79,16 @@ pub fn list_profiles() -> anyhow::Result<()> {
             println!("    secrets:     {}", labels.join(", "));
         }
 
+        // ── quack server ──────────────────────────────────────────────────────
+        if let Some(quack_server) = &profile.quack_server {
+            println!("    quack server: {}", quack_server.get_uri());
+        }
         // ── storage buckets ────────────────────────────────────────────────────────
         if !profile.bucket.is_empty() {
             let names: Vec<&str> = profile
                 .bucket
                 .iter()
-                .map(|(name, value)| name.as_str())
+                .map(|(name, _value)| name.as_str())
                 .collect();
             println!("    storage buckets:  {}", names.join(", "));
         }
@@ -212,6 +216,9 @@ pub fn dump_profile(profile_name: &str) -> anyhow::Result<()> {
     }
     for (name, lake) in &profile.ducklake {
         cmds.push(convert_ducklake_to_sql(name, lake));
+    }
+    if let Some(quack_server) = &profile.quack_server {
+        cmds.push(format!("{};", quack_server.sql_to_start_server()));
     }
 
     if !cmds.is_empty() {

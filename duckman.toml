@@ -2,12 +2,16 @@
 # uuid: 019de241-9889-7c2c-94a5-4de78ccb2cc7
 # dotenv.public.key: 02054a69d217d6c7af9868d5613650e149b35b0fb2d9acbef7989d67f38c360d13
 # ---
-default = "v1.5.2"
+default = "v1.5.3"
 
 # profile of default
 [profile.default]
 description = "Default profile for duckdb"
 settings = { default_order = "ASCENDING" }
+
+[profile.default.quack_server]
+uri = "quack:localhost"
+token = "super_secret"
 
 # secret
 [profile.default.secret.hf]
@@ -48,10 +52,7 @@ SCOPE = 's3://oss-bucket'
 [profile.polyglot]
 description = "Add different files support"
 duckdb_version = "v1.5.2"
-extensions = ["parquet", "excel","quack"]
-init_sql = '''
-CALL quack_serve('quack:0.0.0.0:9494', allow_other_hostname => true);
-'''
+extensions = ["parquet", "excel", "quack"]
 
 [profile.polyglot.environment]
 nick = "Jackie"
