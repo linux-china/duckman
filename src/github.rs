@@ -5,6 +5,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 use serde::Deserialize;
 use std::fs;
 use std::io::Cursor;
+use std::os::unix::fs::PermissionsExt;
 
 #[derive(Debug, Deserialize)]
 pub struct GitHubRelease {
@@ -105,6 +106,10 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
             break;
         }
     }
+    // make duckdb executable if unix
+    if found && cfg!(target_family = "unix") {
+        fs::set_permissions(&binary_path, fs::Permissions::from_mode(0o755))?;
+    }
 
     if !found {
         fs::remove_dir_all(&version_dir)?;
@@ -114,12 +119,16 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
 }
 
 fn platform_asset_name() -> &'static str {
-    if cfg!(target_os = "macos") {
-        "duckdb_cli-osx-universal.zip"
+    if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
+        "duckdb_cli-osx-arm64.zip"
+    } else if cfg!(target_os = "macos") {
+        "duckdb_cli-osx-amd64.zip"
     } else if cfg!(target_os = "linux") && cfg!(target_arch = "aarch64") {
         "duckdb_cli-linux-aarch64.zip"
     } else if cfg!(target_os = "linux") {
         "duckdb_cli-linux-amd64.zip"
+    } else if cfg!(target_os = "windows") && cfg!(target_arch = "aarch64") {
+        "duckdb_cli-windows-arm64.zip"
     } else if cfg!(target_os = "windows") {
         "duckdb_cli-windows-amd64.zip"
     } else {
