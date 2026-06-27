@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-06-28
+
+- Fix Linux install issue
+- Use osx-arm64/osx-amd64 zip for install on macOS
 
 ## [0.1.5] - 2026-05-27
 
