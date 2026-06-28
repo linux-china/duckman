@@ -5,7 +5,6 @@ use indicatif::{ProgressBar, ProgressStyle};
 use serde::Deserialize;
 use std::fs;
 use std::io::Cursor;
-use std::os::unix::fs::PermissionsExt;
 
 #[derive(Debug, Deserialize)]
 pub struct GitHubRelease {
