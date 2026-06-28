@@ -108,15 +108,20 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
             break;
         }
     }
-    // make duckdb executable if unix
-    if found && cfg!(target_family = "unix") {
-        fs::set_permissions(&binary_path, fs::Permissions::from_mode(0o755))?;
-    }
 
     if !found {
         fs::remove_dir_all(&version_dir)?;
         bail!("Could not find duckdb binary inside the downloaded archive.");
     }
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms = fs::metadata(&binary_path)?.permissions();
+        perms.set_mode(0o755);
+        fs::set_permissions(&binary_path, perms)?;
+    }
+
     Ok(())
 }
 
