@@ -5,7 +5,6 @@ use indicatif::{ProgressBar, ProgressStyle};
 use serde::Deserialize;
 use std::fs;
 use std::io::Cursor;
-use std::os::unix::fs::PermissionsExt;
 
 #[derive(Debug, Deserialize)]
 pub struct GitHubRelease {
@@ -40,7 +39,7 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
         }
     };
 
-    let asset_name = platform_asset_name();
+    let asset_name = platform_asset_name(version);
     let asset = match release.find_asset(asset_name) {
         Some(a) => a,
         None => {
@@ -58,6 +57,8 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
         }
     };
 
+    // Print download url
+    println!("Begin to download from {}", &asset.browser_download_url);
     let pb = ProgressBar::new(asset.size);
     pb.set_style(
         ProgressStyle::default_bar()
@@ -106,20 +107,28 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
             break;
         }
     }
-    // make duckdb executable if unix
-    if found && cfg!(target_family = "unix") {
-        fs::set_permissions(&binary_path, fs::Permissions::from_mode(0o755))?;
-    }
 
     if !found {
         fs::remove_dir_all(&version_dir)?;
         bail!("Could not find duckdb binary inside the downloaded archive.");
     }
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms = fs::metadata(&binary_path)?.permissions();
+        perms.set_mode(0o755);
+        fs::set_permissions(&binary_path, perms)?;
+    }
+
     Ok(())
 }
 
-fn platform_asset_name() -> &'static str {
-    if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
+fn platform_asset_name(version: &str) -> &'static str {
+    if cfg!(target_os = "macos") && !version.starts_with("v1.5") {
+        // use universal binary for < 1.5
+        "duckdb_cli-osx-universal.zip"
+    } else if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
         "duckdb_cli-osx-arm64.zip"
     } else if cfg!(target_os = "macos") {
         "duckdb_cli-osx-amd64.zip"
