@@ -49,9 +49,9 @@ URL_STYLE = 'vhost'
 REGION = "oss-cn-hangzhou"
 SCOPE = 's3://oss-bucket'
 
-[profile.default.luajit_module.base64]
+[profile.default.luajit_module.x2]
 mode = "quick_compile"
-source = "s3://demo1/base64.lua"
+source = "return function(x) return x * 2 end"
 
 # profile of polyglot
 [profile.polyglot]
