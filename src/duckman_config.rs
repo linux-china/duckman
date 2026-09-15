@@ -114,6 +114,8 @@ pub struct Profile {
     pub attached: HashMap<String, AttachedDb>,
     #[serde(default)]
     pub ducklake: HashMap<String, DuckLake>,
+    #[serde(default)]
+    pub luajit_module: HashMap<String, LuajitModule>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -256,6 +258,12 @@ pub struct DuckLake {
     pub catalog_endpoint: String,
     pub data_path: String,
     pub sql: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LuajitModule {
+    pub mode: String,
+    pub source: String,
 }
 
 impl DuckmanConfig {
@@ -477,6 +485,20 @@ pub fn convert_bucket_to_sql(
     sql
 }
 
+pub fn convert_luajit_module_to_sql(name: &str, luajit_module: &LuajitModule) -> String {
+    if (luajit_module.source.starts_with("return ")) {
+        return format!(
+            "SELECT message FROM luajit_module( mode := '{}', sql_name := '{}', source := '{}');",
+            luajit_module.mode, name, luajit_module.source
+        );
+    }
+    let content_sql = format!("SELECT content FROM read_text('{}')", luajit_module.source);
+    format!(
+        "SELECT message FROM luajit_module( mode := '{}',sql_name := '{}', source := ({}) );",
+        luajit_module.mode, name, content_sql
+    )
+}
+
 pub fn convert_attached_db_to_sql(
     private_key: &Option<String>,
     name: &str,
@@ -638,6 +660,21 @@ pub fn inject_profile(
             args.push(whoami.get_sql());
         }
     }
+    // luajit_module
+    let luajit_module_map = &profile.luajit_module;
+    if !luajit_module_map.is_empty() {
+        if profile.extensions.contains(&"luajit".to_string()) {
+            args.push("-cmd".to_owned());
+            args.push("install luajit from community;".to_string());
+            args.push("-cmd".to_owned());
+            args.push("load luajit;".to_string());
+        }
+        for (name, luajit_module) in profile.luajit_module.iter() {
+            let sql = convert_luajit_module_to_sql(name, luajit_module);
+            args.push("-cmd".to_owned());
+            args.push(sql);
+        }
+    }
     // init sql
     if let Some(init_sql) = &profile.init_sql {
         let sql = init_sql.replace("\n", " ").trim().to_string();
@@ -681,7 +718,7 @@ mod tests {
 
     #[test]
     fn test_load_from() -> TestResult {
-        let config = DuckmanConfig::load_from("../duckman.toml")?;
+        let config = DuckmanConfig::load_from("duckman.toml")?;
         println!("{:?}", config);
         println!("{:#?}", config.get_private_key());
         Ok(())
@@ -689,7 +726,7 @@ mod tests {
 
     #[test]
     fn test_load_profiles() -> TestResult {
-        let config = DuckmanConfig::load_from("../duckman.toml")?;
+        let config = DuckmanConfig::load_from("duckman.toml")?;
         for entry in config.get_profiles() {
             println!("{}", entry.0);
             println!("{:?}", entry.1);
@@ -699,7 +736,7 @@ mod tests {
 
     #[test]
     fn test_secrets() -> TestResult {
-        let config = DuckmanConfig::load_from("../duckman.toml")?;
+        let config = DuckmanConfig::load_from("duckman.toml")?;
         let default_profile = config.get_profiles().get("default").unwrap();
         for (key, value) in default_profile.secret.iter() {
             println!("{}", key);
@@ -710,11 +747,22 @@ mod tests {
 
     #[test]
     fn test_buckets() -> TestResult {
-        let config = DuckmanConfig::load_from("../duckman.toml")?;
+        let config = DuckmanConfig::load_from("duckman.toml")?;
         let default_profile = config.get_profiles().get("default").unwrap();
         for (key, value) in default_profile.bucket.iter() {
             println!("{}", key);
             println!("sql: {:?}", convert_bucket_to_sql(&None, key, value));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_luajit_module() -> TestResult {
+        let config = DuckmanConfig::load_from("duckman.toml")?;
+        let default_profile = config.get_profiles().get("default").unwrap();
+        for (key, value) in default_profile.luajit_module.iter() {
+            println!("{}", key);
+            println!("sql: {:?}", convert_luajit_module_to_sql(key, value));
         }
         Ok(())
     }

@@ -8,6 +8,7 @@ default = "v1.5.3"
 [profile.default]
 description = "Default profile for duckdb"
 settings = { default_order = "ASCENDING" }
+extensions = ["luajit"]
 
 [profile.default.quack_server]
 uri = "quack:localhost"
@@ -47,6 +48,10 @@ ENDPOINT = 'oss-cn-hangzhou.aliyuncs.com'
 URL_STYLE = 'vhost'
 REGION = "oss-cn-hangzhou"
 SCOPE = 's3://oss-bucket'
+
+[profile.default.luajit_module.base64]
+mode = "quick_compile"
+source = "s3://demo1/base64.lua"
 
 # profile of polyglot
 [profile.polyglot]
