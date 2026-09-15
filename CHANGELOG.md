@@ -4,6 +4,21 @@
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-09-15
+
+- Add [luajit_module](https://duckdb.org/community_extensions/extensions/luajit) support
+
+```
+[profile.default.luajit_module.x2]
+mode = "quick_compile"
+source = "return function(x) return x * 2 end"
+
+[profile.default.luajit_module.base64]
+mode = "quick_compile"
+source = "s3://demo1/base64.lua"
+```
+
+
 ## [0.1.6] - 2026-06-28
 
 - Fix Linux install issue

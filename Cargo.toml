@@ -1,6 +1,6 @@
 [package]
 name = "duckman"
-version = "0.1.6"
+version = "0.1.7"
 edition = "2024"
 authors = ["linux_china <libing.chen@gmail.com>"]
 description = "duckman - a DuckDB version manager and toolchain CLI"
