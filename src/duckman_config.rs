@@ -486,7 +486,7 @@ pub fn convert_bucket_to_sql(
 }
 
 pub fn convert_luajit_module_to_sql(name: &str, luajit_module: &LuajitModule) -> String {
-    if (luajit_module.source.starts_with("return ")) {
+    if luajit_module.source.starts_with("return ") {
         return format!(
             "SELECT message FROM luajit_module( mode := '{}', sql_name := '{}', source := '{}');",
             luajit_module.mode, name, luajit_module.source
