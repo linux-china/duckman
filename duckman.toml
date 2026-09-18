@@ -7,7 +7,7 @@ default = "v1.5.5"
 # profile of default
 [profile.default]
 description = "Default profile for duckdb"
-settings = { default_order = "ASCENDING" }
+settings = { default_order = "ASCENDING", enable_server_cert_verification = false }
 extensions = ["luajit"]
 
 [profile.default.quack_server]
