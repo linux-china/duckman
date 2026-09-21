@@ -42,7 +42,7 @@ which = "8"
 dotenvx-rs = "0.4.33"
 
 [dev-dependencies]
-testresult = "0.4.1"
+testresult = "0.4.2"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 openssl = { version = "0.10", features = ["vendored"] }
