@@ -101,6 +101,7 @@ pub struct Profile {
     pub init_sql: Option<String>,
     pub parquet_key: Option<String>,
     pub settings: Option<toml::Table>,
+    pub variables: Option<toml::Table>,
     pub quack_server: Option<QuackServer>,
     #[serde(default)]
     pub extensions: Vec<String>,
@@ -608,6 +609,15 @@ pub fn inject_profile(
                 .iter()
                 .map(|(k, v)| (k.to_uppercase(), decrypt_value(private_key, v))),
         );
+    }
+    // variables
+    if let Some(variables) = &profile.variables {
+        for (key, value) in variables {
+            let sql_value = convert_toml_value_to_sql_value(private_key, value);
+            let sql = format!("SET VARIABLE {} = {};", key, sql_value);
+            args.push("-cmd".to_owned());
+            args.push(sql);
+        }
     }
     // settings
     if let Some(settings) = &profile.settings {
