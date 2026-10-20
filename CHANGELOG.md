@@ -6,6 +6,7 @@
 
 ## [0.1.7] - 2026-09-15
 
+- Add variables for profile configuration
 - Add [luajit_module](https://duckdb.org/community_extensions/extensions/luajit) support
 
 ```
