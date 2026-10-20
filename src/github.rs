@@ -97,7 +97,7 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
     let mut found = false;
     for i in 0..archive.len() {
         let mut entry = archive.by_index(i)?;
-        let name = entry.name().to_owned();
+        let name = entry.name().to_owned()?;
         // Match "duckdb" or "duckdb.exe" anywhere in the archive path
         let base = name.split('/').last().unwrap_or(&name);
         if base == "duckdb" || base == "duckdb.exe" {
