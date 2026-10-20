@@ -738,7 +738,7 @@ mod tests {
     fn test_load_settings() -> TestResult {
         let config = DuckmanConfig::load_from("duckman.toml")?;
         let default_profile = config.get_profiles().get("default").unwrap();
-        if let Some(settings) = default_profile.settings {
+        if let Some(settings) = &default_profile.settings {
             for (key, value) in settings {
                 println!("{}", key);
                 println!("sql: {:?}", convert_toml_value_to_sql_value(&None, value));
