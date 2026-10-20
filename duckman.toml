@@ -9,6 +9,10 @@ default = "v1.5.5"
 description = "Default profile for duckdb"
 extensions = ["luajit"]
 
+[profile.default.variables]
+admin_name = "Jackie"
+admin_email = "jackie@example.com"
+
 [profile.default.settings]
 default_order = "ASCENDING"
 enable_server_cert_verification = false
