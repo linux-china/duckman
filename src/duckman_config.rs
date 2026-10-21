@@ -673,12 +673,13 @@ pub fn inject_profile(
     // luajit_module
     let luajit_module_map = &profile.luajit_module;
     if !luajit_module_map.is_empty() {
-        if profile.extensions.contains(&"luajit".to_string()) {
+        if !profile.extensions.contains(&"luajit".to_string()) {
             args.push("-cmd".to_owned());
             args.push("install luajit from community;".to_string());
-            args.push("-cmd".to_owned());
-            args.push("load luajit;".to_string());
         }
+        // load luajit
+        args.push("-cmd".to_owned());
+        args.push("load luajit;".to_string());
         for (name, luajit_module) in profile.luajit_module.iter() {
             let sql = convert_luajit_module_to_sql(name, luajit_module);
             args.push("-cmd".to_owned());
@@ -687,7 +688,8 @@ pub fn inject_profile(
     }
     // init sql
     if let Some(init_sql) = &profile.init_sql {
-        let sql = init_sql.lines()
+        let sql = init_sql
+            .lines()
             .filter(|line| !line.is_empty() && !line.starts_with("--"))
             .collect::<Vec<&str>>()
             .join(" ");
