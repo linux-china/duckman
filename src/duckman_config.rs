@@ -218,11 +218,11 @@ impl QuackServer {
         }
         if let Some(bind_addr) = &self.bind_address {
             let port = self.port.unwrap_or(9494);
-            return format!("quack://{bind_addr}:{port}");
+            return format!("quack:{bind_addr}:{port}");
         }
         if let Some(port) = &self.port {
             let bind_addr = &self.bind_address.clone().unwrap_or("localhost".to_string());
-            return format!("quack://{bind_addr}:{port}");
+            return format!("quack:{bind_addr}:{port}");
         }
         if let Some(allow_other_hostname) = self.allow_other_hostname {
             if allow_other_hostname {
