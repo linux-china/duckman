@@ -233,7 +233,26 @@ pub async fn run_duckdb(
 
     let duckdb_profile = profile
         .map(|p| p.to_string())
-        .or_else(|| env::var("DUCKDB_PROFILE").ok());
+        .or_else(|| env::var("DUCKDB_PROFILE").ok())
+        .filter(|p| !p.is_empty());
+    // an explicitly specified profile must exist, `default` is optional
+    if let Some(profile_name) = &duckdb_profile {
+        let profiles = config.get_profiles();
+        if profile_name != "default" && !profiles.contains_key(profile_name) {
+            let mut names: Vec<&String> = profiles.keys().collect();
+            names.sort();
+            let available = if names.is_empty() {
+                "none".to_string()
+            } else {
+                names.iter().map(|n| n.as_str()).collect::<Vec<_>>().join(", ")
+            };
+            anyhow::bail!(
+                "Profile '{}' not found. Available profiles: {}. Run `duckman profile list` for details.",
+                profile_name,
+                available
+            );
+        }
+    }
     let duckdb_version = config.get_duckdb_version(duckdb, &duckdb_profile);
 
     if duckdb_version.is_none() {
