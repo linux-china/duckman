@@ -60,7 +60,17 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
 
     // Print download url
     eprintln!("Begin to download from {}", &asset.browser_download_url);
-    let pb = ProgressBar::new(asset.size);
+    let client = reqwest::Client::new();
+    let response = client
+        .get(&asset.browser_download_url)
+        .header("User-Agent", "Duckman/0.1.0")
+        .send()
+        .await?
+        .error_for_status()?;
+    // Prefer the actual Content-Length over the size reported by the release metadata
+    let total_size = response.content_length().unwrap_or(asset.size);
+
+    let pb = ProgressBar::new(total_size);
     pb.set_style(
         ProgressStyle::default_bar()
             .template(
@@ -69,15 +79,8 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
             .progress_chars("=>-"),
     );
 
-    let client = reqwest::Client::new();
-    let response = client
-        .get(&asset.browser_download_url)
-        .header("User-Agent", "Duckman/0.1.0")
-        .send()
-        .await?;
-
     let mut stream = response.bytes_stream();
-    let mut buf: Vec<u8> = Vec::with_capacity(asset.size as usize);
+    let mut buf: Vec<u8> = Vec::with_capacity(total_size as usize);
     while let Some(chunk) = stream.next().await {
         let chunk = chunk?;
         pb.inc(chunk.len() as u64);
@@ -197,11 +200,28 @@ pub async fn fetch_release(version: &str) -> anyhow::Result<Option<GitHubRelease
         .header("User-Agent", "duckman/0.1.0")
         .header("Accept", "application/vnd.github.v3+json");
     let response = add_auth(req).send().await?;
-    if response.status().is_success() {
-        Ok(Some(response.json::<GitHubRelease>().await?))
-    } else {
-        Ok(None)
+    let status = response.status();
+    if status == reqwest::StatusCode::NOT_FOUND {
+        return Ok(None);
     }
+    if !status.is_success() {
+        let body = response.text().await.unwrap_or_default();
+        let hint = if status == reqwest::StatusCode::FORBIDDEN
+            || status == reqwest::StatusCode::TOO_MANY_REQUESTS
+        {
+            " (GitHub API rate limit may be exceeded, set GITHUB_TOKEN to raise the limit)"
+        } else {
+            ""
+        };
+        bail!(
+            "Failed to fetch release {} from GitHub: HTTP {}{}\n{}",
+            version,
+            status,
+            hint,
+            body.trim()
+        );
+    }
+    Ok(Some(response.json::<GitHubRelease>().await?))
 }
 
 #[cfg(test)]
