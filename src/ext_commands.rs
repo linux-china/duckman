@@ -118,6 +118,7 @@ pub async fn install_extension(name: &str) -> anyhow::Result<()> {
                 }
             } else {
                 eprintln!("{}", String::from_utf8_lossy(&out.stderr));
+                return Err(anyhow::anyhow!("Failed to install extension {}", name));
             }
         }
         Err(e) => anyhow::bail!("Failed to install extension ({}): {}", name, e),
