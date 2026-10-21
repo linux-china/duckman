@@ -449,6 +449,8 @@ impl DuckmanConfig {
             let mut doc: DocumentMut = toml_content.parse().expect("invalid toml");
             if let Some(default_version) = &self.default {
                 doc["default"] = value(default_version.clone());
+            } else {
+                doc.remove("default");
             }
             doc.to_string()
         } else {
@@ -642,10 +644,9 @@ pub fn inject_profile(
             };
             args.push("-cmd".to_owned());
             args.push(sql);
-        } else {
-            args.push("-cmd".to_owned());
-            args.push(format!("load {};", ext_name));
         }
+        args.push("-cmd".to_owned());
+        args.push(format!("load {};", ext_name));
     }
     // environment variable
     if !profile.environment.is_empty() {
