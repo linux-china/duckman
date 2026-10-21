@@ -1,5 +1,5 @@
 use crate::duckman_app::build_duckman_app;
-use crate::duckman_config::{DuckmanConfig, normalize_duckdb_version};
+use crate::duckman_config::{DuckmanConfig, find_duckdb_in_path, normalize_duckdb_version};
 use crate::github;
 use crate::runner::duckdb_execute;
 use clap::ArgMatches;
@@ -171,11 +171,9 @@ pub async fn install_version(version: &str) -> anyhow::Result<()> {
         return install_from_path(version).await;
     }
     if version == "system" {
-        let path =
-            which::which("duckdb").map_err(|_| anyhow::anyhow!("duckdb not found in PATH"))?;
-        if !path.is_symlink() {
-            return install_from_path(path.to_str().unwrap()).await;
-        }
+        let path = find_duckdb_in_path()
+            .ok_or_else(|| anyhow::anyhow!("duckdb not found in PATH (duckman shim is ignored)"))?;
+        return install_from_path(path.to_str().unwrap()).await;
     }
     let version = normalize_duckdb_version(version);
     let mut config = DuckmanConfig::load()?;

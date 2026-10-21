@@ -69,6 +69,28 @@ pub fn duckman_home_dir() -> PathBuf {
         .join(".duckdb")
 }
 
+/// Whether the path (after resolving symlinks) is the duckman shim binary.
+pub fn is_duckman_shim(path: &Path) -> bool {
+    let real = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
+    let is_shim_name = real
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .is_some_and(|s| s.starts_with("duckman_shim"));
+    let is_current_exe = env::current_exe()
+        .and_then(|exe| exe.canonicalize())
+        .is_ok_and(|exe| exe == real);
+    is_shim_name || is_current_exe
+}
+
+/// Find a real duckdb binary in PATH, skipping the duckman shim (e.g. `~/bin/duckdb -> duckman_shim`).
+/// The returned path is canonicalized, so symlinks are resolved.
+pub fn find_duckdb_in_path() -> Option<PathBuf> {
+    which::which_all("duckdb")
+        .ok()?
+        .filter(|path| !is_duckman_shim(path))
+        .find_map(|path| path.canonicalize().ok())
+}
+
 /// Top-level structure of ~/.duckdb/duckman.toml
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct DuckmanConfig {

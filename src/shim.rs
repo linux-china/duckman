@@ -22,6 +22,18 @@ async fn main() -> anyhow::Result<()> {
              Run `duckman install <version>` first."
         );
     }
+    // Guard against self-recursion: the resolved binary must not be the shim itself
+    let duckdb_version = duckdb_version.unwrap();
+    let binary = DuckmanConfig::version_binary(&duckdb_version);
+    if binary.exists() && duckman_config::is_duckman_shim(&binary) {
+        bail!(
+            "DuckDB {} binary {} points to duckman shim, please reinstall it with `duckman uninstall {} && duckman install {}`",
+            duckdb_version,
+            binary.display(),
+            duckdb_version,
+            duckdb_version
+        );
+    }
     let extra_args: Vec<String> = raw_args
         .iter()
         .skip(1)
@@ -29,7 +41,7 @@ async fn main() -> anyhow::Result<()> {
         .collect();
     duckdb_execute(
         &config,
-        &duckdb_version.unwrap(),
+        &duckdb_version,
         &duckdb_profile,
         extra_args,
     )

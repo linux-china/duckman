@@ -1,6 +1,6 @@
 use crate::duckman_config::{
     COMMUNITY_EXTENSIONS_CSV, CORE_EXTENSIONS_CSV, DUCKDB_CORE_EXTENSIONS, DuckmanConfig,
-    normalize_duckdb_version,
+    find_duckdb_in_path, normalize_duckdb_version,
 };
 use colored::Colorize;
 use std::io::Write;
@@ -15,11 +15,7 @@ fn find_duckdb_binary(config: &DuckmanConfig, version_override: Option<&str>) ->
         return Ok(DuckmanConfig::version_binary(&duckdb_version));
     }
     // Fall back to duckdb in PATH
-    if let Ok(path) = which::which("duckdb") {
-        Ok(path)
-    } else {
-        Err(anyhow::anyhow!("duckdb not found"))
-    }
+    find_duckdb_in_path().ok_or_else(|| anyhow::anyhow!("duckdb not found"))
 }
 
 // ── list ─────────────────────────────────────────────────────────────────────
