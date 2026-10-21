@@ -532,7 +532,7 @@ pub fn convert_ducklake_to_sql(name: &str, db: &DuckLake) -> String {
 pub fn convert_toml_value_to_sql_value(private_key: &Option<String>, value: &Value) -> String {
     match value {
         Value::String(s) => {
-            format!("'{}\'", decrypt_value(private_key, s.as_str()))
+            format!("'{}\'", escape_sql_value(decrypt_value(private_key, s.as_str())))
         }
         Value::Integer(i) => i.to_string(),
         Value::Float(f) => f.to_string(),
@@ -569,6 +569,13 @@ pub fn decrypt_value(private_key: &Option<String>, value: &str) -> String {
         }
     }
     value.to_string()
+}
+
+fn escape_sql_value(s: String) -> String {
+    if s.contains('\'') {
+        return s;
+    }
+    s.replace('\'', "''")
 }
 
 pub fn inject_profile(
