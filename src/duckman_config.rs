@@ -394,7 +394,7 @@ impl DuckmanConfig {
             if let Some(profiles) = &self.profile {
                 if let Some(selected_profile) = profiles.get(profile_name) {
                     if let Some(profile_duckdb_version) = &selected_profile.duckdb_version {
-                        Some(profile_duckdb_version.to_string());
+                        return Some(profile_duckdb_version.to_string());
                     }
                 }
             }
@@ -687,8 +687,11 @@ pub fn inject_profile(
     }
     // init sql
     if let Some(init_sql) = &profile.init_sql {
-        let sql = init_sql.replace("\n", " ").trim().to_string();
-        if !sql.is_empty() {
+        let sql = init_sql.lines()
+            .filter(|line| !line.is_empty() && !line.starts_with("--"))
+            .collect::<Vec<&str>>()
+            .join(" ");
+        if !init_sql.is_empty() {
             args.push("-cmd".to_owned());
             args.push(sql);
         }
