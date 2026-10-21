@@ -15,6 +15,7 @@ mod snippet_commands;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
+    let _ = rustls::crypto::ring::default_provider().install_default();
     dotenvx_rs::dotenv().ok();
     let matches = build_duckman_app().get_matches();
 

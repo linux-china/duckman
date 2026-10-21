@@ -9,6 +9,7 @@ mod runner;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
+    let _ = rustls::crypto::ring::default_provider().install_default();
     dotenvx_rs::dotenv().ok();
     let mut raw_args: Vec<OsString> = env::args_os().collect();
     // get shim command name

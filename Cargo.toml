@@ -26,11 +26,12 @@ path = "src/shim.rs"
 tokio = { version = "1.54", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 csv = "1.4"
-reqwest = { version = "0.13", features = ["json", "stream"] }
+reqwest = { version = "0.13", default-features = false, features = ["json", "stream", "rustls-no-provider", "http2", "system-proxy"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
 clap = "4.6"
 clap_complete = "4.6"
 colored = "3.1"
-zip = "9.0"
+zip = { version = "9.0", default-features = false, features = ["deflate-flate2-zlib-rs"] }
 dirs = "7"
 anyhow = "1"
 indicatif = "0.18"
