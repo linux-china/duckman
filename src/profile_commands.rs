@@ -202,7 +202,7 @@ pub fn dump_profile(profile_name: &str) -> anyhow::Result<()> {
     if let Some(parquet_key) = &profile.parquet_key {
         cmds.push(format!(
             "PRAGMA add_parquet_key('key256','{}');",
-            parquet_key
+            decrypt_value(private_key, parquet_key)
         ));
     }
     for (name, value) in &profile.secret {
