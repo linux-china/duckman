@@ -387,7 +387,15 @@ impl DuckmanConfig {
         }
     }
 
-    pub fn get_duckdb_version(&self, profile_name: &Option<String>) -> Option<String> {
+    /// Version resolution: `-d/--duckdb` > DUCKDB_VERSION env > profile > config default > installed
+    pub fn get_duckdb_version(
+        &self,
+        duckdb_version: Option<&str>,
+        profile_name: &Option<String>,
+    ) -> Option<String> {
+        if let Some(version) = duckdb_version {
+            return Some(normalize_duckdb_version(version));
+        }
         if let Ok(version) = env::var("DUCKDB_VERSION") {
             return Some(version);
         }

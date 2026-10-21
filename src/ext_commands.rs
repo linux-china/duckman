@@ -6,17 +6,12 @@ use colored::Colorize;
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
-use std::{env, fs};
+use std::fs;
 
 // Platform identifier used in the extensions URL and install pat
-fn find_duckdb_binary() -> anyhow::Result<PathBuf> {
-    // find specified version
-    if let Ok(duckdb_version) = env::var("DUCKDB_VERSION") {
-        return Ok(DuckmanConfig::version_binary(&duckdb_version));
-    }
-    // load default from config
-    let config = DuckmanConfig::load()?;
-    if let Some(duckdb_version) = config.get_duckdb_version(&None) {
+fn find_duckdb_binary(config: &DuckmanConfig, version_override: Option<&str>) -> anyhow::Result<PathBuf> {
+    // specified version, or default from config
+    if let Some(duckdb_version) = config.get_duckdb_version(version_override, &None) {
         return Ok(DuckmanConfig::version_binary(&duckdb_version));
     }
     // Fall back to duckdb in PATH
@@ -29,21 +24,21 @@ fn find_duckdb_binary() -> anyhow::Result<PathBuf> {
 
 // ── list ─────────────────────────────────────────────────────────────────────
 
-pub fn list_extensions(remote: bool) -> anyhow::Result<()> {
+pub fn list_extensions(remote: bool, version_override: Option<&str>) -> anyhow::Result<()> {
     if remote {
         list_remote_extensions()
     } else {
-        list_local_extensions()
+        list_local_extensions(version_override)
     }
 }
 
-fn list_local_extensions() -> anyhow::Result<()> {
+fn list_local_extensions(version_override: Option<&str>) -> anyhow::Result<()> {
     let config = &DuckmanConfig::load()?;
-    let duckdb_version = config.get_duckdb_version(&None);
+    let duckdb_version = config.get_duckdb_version(version_override, &None);
     if let Some(version) = duckdb_version {
         println!("Listing extensions for DuckDB {}", version.green());
     }
-    let duckdb = find_duckdb_binary()?;
+    let duckdb = find_duckdb_binary(config, version_override)?;
     let status = Command::new(&duckdb)
         .args([
             "-c",
@@ -92,10 +87,10 @@ fn list_remote_extensions() -> anyhow::Result<()> {
 
 // ── install ───────────────────────────────────────────────────────────────────
 
-pub async fn install_extension(name: &str) -> anyhow::Result<()> {
+pub async fn install_extension(name: &str, version_override: Option<&str>) -> anyhow::Result<()> {
     let config = &DuckmanConfig::load()?;
-    let duckdb = find_duckdb_binary()?;
-    let duckdb_version = config.get_duckdb_version(&None);
+    let duckdb = find_duckdb_binary(config, version_override)?;
+    let duckdb_version = config.get_duckdb_version(version_override, &None);
     let sql = if DUCKDB_CORE_EXTENSIONS.contains(&name) {
         format!("INSTALL {}", name)
     } else {
@@ -128,9 +123,9 @@ pub async fn install_extension(name: &str) -> anyhow::Result<()> {
 
 // ── uninstall ─────────────────────────────────────────────────────────────────
 
-pub fn uninstall_extension(name: &str) -> anyhow::Result<()> {
+pub fn uninstall_extension(name: &str, version_override: Option<&str>) -> anyhow::Result<()> {
     let config = DuckmanConfig::load()?;
-    let version = config.get_duckdb_version(&None);
+    let version = config.get_duckdb_version(version_override, &None);
     if version.is_none() {
         anyhow::bail!("No duckdb version found!");
     }
@@ -178,7 +173,7 @@ fn query_installed_extensions(binary: &std::path::Path) -> anyhow::Result<Vec<St
 
 // ── migrate ───────────────────────────────────────────────────────────────────
 
-pub fn migrate_extensions(from_version: &str) -> anyhow::Result<()> {
+pub fn migrate_extensions(from_version: &str, version_override: Option<&str>) -> anyhow::Result<()> {
     let source_version = normalize_duckdb_version(from_version);
     let source_binary = DuckmanConfig::version_binary(&source_version);
     if !source_binary.exists() {
@@ -209,10 +204,10 @@ pub fn migrate_extensions(from_version: &str) -> anyhow::Result<()> {
     println!();
 
     // Target: current default duckdb
-    let current_binary = find_duckdb_binary()?;
-    let config = DuckmanConfig::load()?;
+    let config = &DuckmanConfig::load()?;
+    let current_binary = find_duckdb_binary(config, version_override)?;
     let current_version = config
-        .get_duckdb_version(&None)
+        .get_duckdb_version(version_override, &None)
         .unwrap_or_else(|| "current".to_string());
 
     // Query already-installed extensions in the current version to skip them
@@ -285,8 +280,9 @@ pub fn migrate_extensions(from_version: &str) -> anyhow::Result<()> {
 
 // ── update ────────────────────────────────────────────────────────────────────
 
-pub fn update_extensions() -> anyhow::Result<()> {
-    let duckdb = find_duckdb_binary()?;
+pub fn update_extensions(version_override: Option<&str>) -> anyhow::Result<()> {
+    let config = &DuckmanConfig::load()?;
+    let duckdb = find_duckdb_binary(config, version_override)?;
     let status = Command::new(&duckdb)
         .args(["-c", "UPDATE EXTENSIONS"])
         .status();
@@ -309,7 +305,7 @@ mod tests {
     #[tokio::test]
     async fn test_install_extension() -> TestResult {
         let ext_name = "shellfs";
-        install_extension(ext_name).await?;
+        install_extension(ext_name, None).await?;
         Ok(())
     }
 }

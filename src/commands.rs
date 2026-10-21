@@ -226,14 +226,17 @@ pub async fn uninstall_version(version: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub async fn run_duckdb(profile: Option<&str>, extra_args: Vec<String>) -> anyhow::Result<()> {
+pub async fn run_duckdb(
+    duckdb: Option<&str>,
+    profile: Option<&str>,
+    extra_args: Vec<String>,
+) -> anyhow::Result<()> {
     let config = DuckmanConfig::load()?;
 
-    // Version resolution: explicit arg > DUCKDB_VERSION env > config default
     let duckdb_profile = profile
         .map(|p| p.to_string())
         .or_else(|| env::var("DUCKDB_PROFILE").ok());
-    let duckdb_version = config.get_duckdb_version(&duckdb_profile);
+    let duckdb_version = config.get_duckdb_version(duckdb, &duckdb_profile);
 
     if duckdb_version.is_none() {
         anyhow::bail!(
@@ -250,11 +253,11 @@ pub async fn run_duckdb(profile: Option<&str>, extra_args: Vec<String>) -> anyho
     .await
 }
 
-pub fn which_duckdb(version: Option<&str>) -> anyhow::Result<()> {
+pub fn which_duckdb(version: Option<&str>, duckdb: Option<&str>) -> anyhow::Result<()> {
     let config = DuckmanConfig::load()?;
     let resolved = version
         .map(normalize_duckdb_version)
-        .or_else(|| config.get_duckdb_version(&None));
+        .or_else(|| config.get_duckdb_version(duckdb, &None));
 
     let resolved = match resolved {
         Some(v) => v,

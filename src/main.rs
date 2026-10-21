@@ -13,17 +13,13 @@ mod profile_commands;
 pub mod runner;
 mod snippet_commands;
 
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
     dotenvx_rs::dotenv().ok();
     let matches = build_duckman_app().get_matches();
 
-    // inject global duckdb version
-    if let Some(duckdb_version) = matches.get_one::<String>("duckdb") {
-        unsafe {
-            env::set_var("DUCKDB_VERSION", duckdb_version);
-        }
-    }
+    // global duckdb version from `-d/--duckdb`, passed explicitly to commands
+    let duckdb = matches.get_one::<String>("duckdb").map(|s| s.as_str());
     // sub command match
     match matches.subcommand() {
         Some(("list", m)) => {
@@ -49,11 +45,11 @@ async fn main() -> anyhow::Result<()> {
                 .skip(1)
                 .cloned()
                 .collect();
-            commands::run_duckdb(profile, extra_args).await?;
+            commands::run_duckdb(duckdb, profile, extra_args).await?;
         }
         Some(("which", m)) => {
             let version = m.get_one::<String>("version").map(|s| s.as_str());
-            commands::which_duckdb(version)?;
+            commands::which_duckdb(version, duckdb)?;
         }
         Some(("count", _)) => {
             commands::count_versions()?;
@@ -73,22 +69,22 @@ async fn main() -> anyhow::Result<()> {
         Some(("ext", m)) => match m.subcommand() {
             Some(("list", sm)) => {
                 let remote = sm.get_flag("remote");
-                ext_commands::list_extensions(remote)?;
+                ext_commands::list_extensions(remote, duckdb)?;
             }
             Some(("install", sm)) => {
                 let name = sm.get_one::<String>("name").unwrap();
-                ext_commands::install_extension(name).await?;
+                ext_commands::install_extension(name, duckdb).await?;
             }
             Some(("uninstall", sm)) => {
                 let name = sm.get_one::<String>("name").unwrap();
-                ext_commands::uninstall_extension(name)?;
+                ext_commands::uninstall_extension(name, duckdb)?;
             }
             Some(("update", _)) => {
-                ext_commands::update_extensions()?;
+                ext_commands::update_extensions(duckdb)?;
             }
             Some(("migrate", sm)) => {
                 let version = sm.get_one::<String>("version").unwrap();
-                ext_commands::migrate_extensions(version)?;
+                ext_commands::migrate_extensions(version, duckdb)?;
             }
             _ => unreachable!(),
         },

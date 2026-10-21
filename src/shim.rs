@@ -7,7 +7,7 @@ use std::ffi::OsString;
 mod duckman_config;
 mod runner;
 
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
     dotenvx_rs::dotenv().ok();
     let mut raw_args: Vec<OsString> = env::args_os().collect();
@@ -15,7 +15,7 @@ async fn main() -> anyhow::Result<()> {
     let shim_command = raw_args[0].clone().to_str().unwrap().to_owned();
     let config = DuckmanConfig::load()?;
     let duckdb_profile = env::var("DUCKDB_PROFILE").ok();
-    let duckdb_version = config.get_duckdb_version(&duckdb_profile);
+    let duckdb_version = config.get_duckdb_version(None, &duckdb_profile);
     if duckdb_version.is_none() {
         bail!(
             "No DuckDB version specified and no default set. \
