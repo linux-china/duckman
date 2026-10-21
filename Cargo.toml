@@ -40,7 +40,7 @@ toml = { version = "1.1.8", features = ["preserve_order"] }
 toml_edit = "0.25.17"
 lazy_static = "1.5.1"
 which = "8"
-dotenvx-rs = "0.4.33"
+dotenvx-rs = "0.4.34"
 
 [dev-dependencies]
 testresult = "0.4.2"
