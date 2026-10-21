@@ -314,7 +314,7 @@ impl DuckmanConfig {
     pub fn extension_path(duckdb_version: &str, ext_name: &str) -> PathBuf {
         DuckmanConfig::home_dir()
             .join("extensions")
-            .join(duckdb_version)
+            .join(normalize_duckdb_version(duckdb_version))
             .join(duckdb_platform_id())
             .join(format!("{}.duckdb_extension", ext_name))
     }
@@ -394,6 +394,17 @@ impl DuckmanConfig {
         if config_file.as_ref().exists() {
             let content = fs::read_to_string(&config_file)?;
             let mut config: DuckmanConfig = toml::from_str(&content)?;
+            // normalize versions, e.g. `1.5.2` -> `v1.5.2`
+            if let Some(default_version) = &config.default {
+                config.default = Some(normalize_duckdb_version(default_version));
+            }
+            if let Some(profiles) = config.profile.as_mut() {
+                for profile in profiles.values_mut() {
+                    if let Some(version) = &profile.duckdb_version {
+                        profile.duckdb_version = Some(normalize_duckdb_version(version));
+                    }
+                }
+            }
             if let Some(offset) = content.find("dotenv.public.key") {
                 let remain = &content[offset + 17..];
                 if let Some(offset2) = remain.find('\n') {
@@ -419,19 +430,19 @@ impl DuckmanConfig {
             return Some(normalize_duckdb_version(version));
         }
         if let Ok(version) = env::var("DUCKDB_VERSION") {
-            return Some(version);
+            return Some(normalize_duckdb_version(&version));
         }
         if let Some(profile_name) = profile_name {
             if let Some(profiles) = &self.profile {
                 if let Some(selected_profile) = profiles.get(profile_name) {
                     if let Some(profile_duckdb_version) = &selected_profile.duckdb_version {
-                        return Some(profile_duckdb_version.to_string());
+                        return Some(normalize_duckdb_version(profile_duckdb_version));
                     }
                 }
             }
         }
-        if self.default.is_some() {
-            return Some(self.default.clone().unwrap());
+        if let Some(default_version) = &self.default {
+            return Some(normalize_duckdb_version(default_version));
         }
         let versions = Self::installed_versions();
         if let Some(version) = versions.into_iter().next() {
@@ -520,13 +531,14 @@ pub fn convert_bucket_to_sql(
 }
 
 pub fn convert_luajit_module_to_sql(name: &str, luajit_module: &LuajitModule) -> String {
+    let lua_source  = escape_sql_value(luajit_module.source.clone());
     if luajit_module.source.starts_with("return ") {
         return format!(
             "SELECT message FROM luajit_module( mode := '{}', sql_name := '{}', source := '{}');",
-            luajit_module.mode, name, luajit_module.source
+            luajit_module.mode, name, lua_source
         );
     }
-    let content_sql = format!("SELECT content FROM read_text('{}')", luajit_module.source);
+    let content_sql = format!("SELECT content FROM read_text('{}')", lua_source);
     format!(
         "SELECT message FROM luajit_module( mode := '{}',sql_name := '{}', source := ({}) );",
         luajit_module.mode, name, content_sql
