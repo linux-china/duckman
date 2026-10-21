@@ -189,6 +189,13 @@ pub fn dump_profile(profile_name: &str) -> anyhow::Result<()> {
     // collect -cmd arguments
     let mut cmds: Vec<String> = Vec::new();
 
+    // variables
+    if let Some(variables) = &profile.variables {
+        for (key, value) in variables {
+            let sql_value = convert_toml_value_to_sql_value(private_key, value);
+            cmds.push(format!("SET VARIABLE {} = {};", key, sql_value));
+        }
+    }
     // settings
     if let Some(settings) = &profile.settings {
         for (key, value) in settings {
