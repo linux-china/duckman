@@ -94,7 +94,21 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
     let version_dir = DuckmanConfig::version_dir(&version);
     fs::create_dir_all(&version_dir)?;
     let binary_path = DuckmanConfig::version_binary(&version);
+    // Extract to a temp file first, then rename, so an interrupted install never leaves a partial binary
+    let tmp_path = binary_path.with_extension("tmp");
+    if let Err(e) = extract_binary(&mut archive, &tmp_path, &binary_path) {
+        let _ = fs::remove_dir_all(&version_dir);
+        return Err(e);
+    }
 
+    Ok(())
+}
+
+fn extract_binary<R: std::io::Read + std::io::Seek>(
+    archive: &mut zip::ZipArchive<R>,
+    tmp_path: &std::path::Path,
+    binary_path: &std::path::Path,
+) -> anyhow::Result<()> {
     let mut found = false;
     for i in 0..archive.len() {
         let mut entry = archive.by_index(i)?;
@@ -102,26 +116,27 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
         // Match "duckdb" or "duckdb.exe" anywhere in the archive path
         let base = name.split('/').last().unwrap_or(&name);
         if base == "duckdb" || base == "duckdb.exe" {
-            let mut out = fs::File::create(&binary_path)?;
+            let mut out = fs::File::create(tmp_path)?;
             std::io::copy(&mut entry, &mut out)?;
+            out.sync_all()?;
             found = true;
             break;
         }
     }
 
     if !found {
-        fs::remove_dir_all(&version_dir)?;
         bail!("Could not find duckdb binary inside the downloaded archive.");
     }
 
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        let mut perms = fs::metadata(&binary_path)?.permissions();
+        let mut perms = fs::metadata(tmp_path)?.permissions();
         perms.set_mode(0o755);
-        fs::set_permissions(&binary_path, perms)?;
+        fs::set_permissions(tmp_path, perms)?;
     }
 
+    fs::rename(tmp_path, binary_path)?;
     Ok(())
 }
 
