@@ -30,7 +30,7 @@ impl GitHubRelease {
 
 pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
     // Fetch release metadata from GitHub
-    println!("Fetching release info for {}...", version);
+    eprintln!("Fetching release info for {}...", version);
     let release = fetch_release(&version).await?;
     let release = match release {
         Some(r) => r,
@@ -58,7 +58,7 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
     };
 
     // Print download url
-    println!("Begin to download from {}", &asset.browser_download_url);
+    eprintln!("Begin to download from {}", &asset.browser_download_url);
     let pb = ProgressBar::new(asset.size);
     pb.set_style(
         ProgressStyle::default_bar()
@@ -86,7 +86,7 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
     let bytes = buf;
 
     // Extract binary from zip
-    println!("Extracting...");
+    eprintln!("Extracting...");
     let cursor = Cursor::new(bytes.to_vec());
     let mut archive = zip::ZipArchive::new(cursor)?;
 
