@@ -302,13 +302,13 @@ pub fn completion_command(command_matches: &ArgMatches) {
         .to_lowercase();
     let mut cmd = build_duckman_app();
     if shell_name == "bash" {
-        generate(Bash, &mut cmd, "dotenvx", &mut stdout());
+        generate(Bash, &mut cmd, "duckman", &mut stdout());
     } else if shell_name == "zsh" {
-        generate(Zsh, &mut cmd, "dotenvx", &mut stdout());
+        generate(Zsh, &mut cmd, "duckman", &mut stdout());
     } else if shell_name == "fish" {
-        generate(Fish, &mut cmd, "dotenvx", &mut stdout());
+        generate(Fish, &mut cmd, "duckman", &mut stdout());
     } else if shell_name == "powershell" || shell_name == "pwsh" {
-        generate(PowerShell, &mut cmd, "dotenvx", &mut stdout());
+        generate(PowerShell, &mut cmd, "duckman", &mut stdout());
     } else {
         eprintln!(
             "Unsupported shell: {shell_name}. Supported shells are bash/zsh/fish/powershell."
