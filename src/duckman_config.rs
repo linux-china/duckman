@@ -1,6 +1,7 @@
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fmt::format;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 use toml::Value;
@@ -532,17 +533,26 @@ pub fn convert_ducklake_to_sql(name: &str, db: &DuckLake) -> String {
 pub fn convert_toml_value_to_sql_value(private_key: &Option<String>, value: &Value) -> String {
     match value {
         Value::String(s) => {
-            format!("'{}\'", escape_sql_value(decrypt_value(private_key, s.as_str())))
+            format!(
+                "'{}\'",
+                escape_sql_value(decrypt_value(private_key, s.as_str()))
+            )
         }
         Value::Integer(i) => i.to_string(),
         Value::Float(f) => f.to_string(),
         Value::Boolean(b) => b.to_string(),
-        Value::Datetime(d) => d.to_string(),
-        Value::Array(a) => a
-            .iter()
-            .map(|v| convert_toml_value_to_sql_value(private_key, v))
-            .collect::<Vec<String>>()
-            .join(", "),
+        Value::Datetime(d) => {
+            format!("'{}'", d.to_string())
+        }
+        Value::Array(arr) => {
+            format!(
+                "[{}]",
+                arr.iter()
+                    .map(|v| convert_toml_value_to_sql_value(private_key, v))
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            )
+        }
         Value::Table(t) => {
             let pairs = t
                 .iter()
