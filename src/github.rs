@@ -1,4 +1,4 @@
-use crate::duckman_config::{normalize_duckdb_version, DuckmanConfig};
+use crate::duckman_config::{DuckmanConfig, normalize_duckdb_version};
 use anyhow::bail;
 use futures_util::StreamExt;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -144,7 +144,10 @@ fn extract_binary<R: std::io::Read + std::io::Seek>(
 }
 
 fn platform_asset_name(version: &str) -> &'static str {
-    if cfg!(target_os = "macos") && !version.starts_with("v1.5") && !version.starts_with("v2.") {
+    if version.starts_with("v2.0") {
+        return platform_asset_name_2();
+    }
+    if cfg!(target_os = "macos") && !version.starts_with("v1.5") {
         // use universal binary for < 1.5
         "duckdb_cli-osx-universal.zip"
     } else if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
@@ -161,6 +164,24 @@ fn platform_asset_name(version: &str) -> &'static str {
         "duckdb_cli-windows-amd64.zip"
     } else {
         "duckdb_cli-linux-amd64.zip"
+    }
+}
+
+fn platform_asset_name_2() -> &'static str {
+    if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
+        "duckdb_cli-osx-arm64.tar.gz"
+    } else if cfg!(target_os = "macos") {
+        "duckdb_cli-osx-amd64.tar.gz"
+    } else if cfg!(target_os = "linux") && cfg!(target_arch = "aarch64") {
+        "duckdb_cli-linux-arm64.tar.gz"
+    } else if cfg!(target_os = "linux") {
+        "duckdb_cli-linux-amd64.tar.gz"
+    } else if cfg!(target_os = "windows") && cfg!(target_arch = "aarch64") {
+        "duckdb_cli-windows-arm64.tar.gz"
+    } else if cfg!(target_os = "windows") {
+        "duckdb_cli-windows-amd64.tar.gz"
+    } else {
+        "duckdb_cli-linux-amd64.tar.gz"
     }
 }
 
