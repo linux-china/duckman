@@ -133,7 +133,7 @@ async fn install_from_path(src: &str) -> anyhow::Result<()> {
     }
     let version = version_from_path_binary(src_path)?;
     let version = normalize_duckdb_version(&version);
-    let mut config = DuckmanConfig::load()?;
+    let mut config = DuckmanConfig::load_global()?;
 
     if DuckmanConfig::is_duckdb_installed(&version) {
         println!("DuckDB {} is already installed.", version.green());
@@ -176,7 +176,7 @@ pub async fn install_version(version: &str) -> anyhow::Result<()> {
         return install_from_path(path.to_str().unwrap()).await;
     }
     let version = normalize_duckdb_version(version);
-    let mut config = DuckmanConfig::load()?;
+    let mut config = DuckmanConfig::load_global()?;
 
     if DuckmanConfig::is_duckdb_installed(&version) {
         println!("DuckDB {} is already installed.", version.green());
@@ -205,7 +205,7 @@ pub async fn install_version(version: &str) -> anyhow::Result<()> {
 
 pub async fn uninstall_version(version: &str) -> anyhow::Result<()> {
     let version = normalize_duckdb_version(version);
-    let mut config = DuckmanConfig::load()?;
+    let mut config = DuckmanConfig::load_global()?;
 
     if !DuckmanConfig::is_duckdb_installed(&version) {
         anyhow::bail!("DuckDB {} is not installed.", version);
