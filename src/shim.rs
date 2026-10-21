@@ -11,9 +11,9 @@ mod runner;
 async fn main() -> anyhow::Result<()> {
     let _ = rustls::crypto::ring::default_provider().install_default();
     dotenvx_rs::dotenv().ok();
-    let mut raw_args: Vec<OsString> = env::args_os().collect();
+    let raw_args: Vec<OsString> = env::args_os().collect();
     // get shim command name
-    let shim_command = raw_args[0].clone().to_str().unwrap().to_owned();
+    //let shim_command = raw_args[0].clone().to_str().unwrap().to_owned();
     let config = DuckmanConfig::load()?;
     let duckdb_profile = env::var("DUCKDB_PROFILE").ok();
     let duckdb_version = config.get_duckdb_version(None, &duckdb_profile);
