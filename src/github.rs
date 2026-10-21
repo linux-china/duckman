@@ -126,7 +126,7 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
 }
 
 fn platform_asset_name(version: &str) -> &'static str {
-    if cfg!(target_os = "macos") && !version.starts_with("v1.5") {
+    if cfg!(target_os = "macos") && !version.starts_with("v1.5") && !version.starts_with("v2.") {
         // use universal binary for < 1.5
         "duckdb_cli-osx-universal.zip"
     } else if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
