@@ -613,9 +613,9 @@ pub fn decrypt_value(private_key: &Option<String>, value: &str) -> String {
 
 fn escape_sql_value(s: String) -> String {
     if s.contains('\'') {
-        return s;
+        return s.replace('\'', "''");
     }
-    s.replace('\'', "''")
+    s
 }
 
 pub fn inject_profile(
