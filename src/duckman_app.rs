@@ -134,7 +134,7 @@ pub fn build_duckman_app() -> Command {
             Arg::new("shell")
                 .long("shell")
                 .help("shell name: bash, zsh, fish, powershell")
-                .value_parser(["bash", "zsh", "first", "powershell"])
+                .value_parser(["bash", "zsh", "fish", "powershell"])
                 .num_args(1)
                 .required(false),
         );
