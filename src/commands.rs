@@ -173,7 +173,9 @@ pub async fn install_version(version: &str) -> anyhow::Result<()> {
     if version == "system" {
         let path =
             which::which("duckdb").map_err(|_| anyhow::anyhow!("duckdb not found in PATH"))?;
-        return install_from_path(path.to_str().unwrap()).await;
+        if !path.is_symlink() {
+            return install_from_path(path.to_str().unwrap()).await;
+        }
     }
     let version = normalize_duckdb_version(version);
     let mut config = DuckmanConfig::load()?;
