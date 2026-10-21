@@ -25,7 +25,6 @@ pub async fn duckdb_execute(
     // environment variables
     let mut new_env: HashMap<String, String> = env::vars().collect();
     let mut new_extra_args = vec![];
-    new_extra_args.extend(extra_args);
     // profiles
     let profiles = config.get_profiles();
     if !profiles.is_empty() {
@@ -55,6 +54,7 @@ pub async fn duckdb_execute(
             }
         }
     }
+    new_extra_args.extend(extra_args);
     // On Unix: replace this process with duckdb — stdin/stdout/stderr are
     // inherited automatically, so pipes work transparently.
     #[cfg(unix)]
