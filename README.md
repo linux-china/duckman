@@ -26,8 +26,8 @@ Features:
 
 - Mac: `brew install linux-china/tap/duckman`
 - Cargo: `cargo binstall duckman`
-- Shell: `curl --proto '=https' --tlsv1.2 -LsSf https://github.com/linux-china/duckman/releases/download/v0.1.4/duckman-installer.sh | sh`
-- PowerShell: `powershell -ExecutionPolicy Bypass -c "irm https://github.com/linux-china/duckman/releases/download/v0.1.4/duckman-installer.ps1 | iex"`
+- Shell: `curl --proto '=https' --tlsv1.2 -LsSf https://github.com/linux-china/duckman/releases/download/v0.2.0/duckman-installer.sh | sh`
+- PowerShell: `powershell -ExecutionPolicy Bypass -c "irm https://github.com/linux-china/duckman/releases/download/v0.2.0/duckman-installer.ps1 | iex"`
 
 # profiles
 

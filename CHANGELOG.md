@@ -4,8 +4,10 @@
 
 ## [Unreleased]
 
-## [0.1.7] - 2026-09-15
 
+## [0.2.0] - 2026-10-21
+
+- Add DuckDB 2.0 support
 - Add variables for profile configuration
 - Add [luajit_module](https://duckdb.org/community_extensions/extensions/luajit) support
 
@@ -18,7 +20,6 @@ source = "return function(x) return x * 2 end"
 mode = "quick_compile"
 source = "s3://demo1/base64.lua"
 ```
-
 
 ## [0.1.6] - 2026-06-28
 
