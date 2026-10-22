@@ -5,7 +5,7 @@
 ## [Unreleased]
 
 
-## [0.2.0] - 2026-10-21
+## [0.2.0] - 2026-10-22
 
 - Add DuckDB 2.0 support
 - Add variables for profile configuration
