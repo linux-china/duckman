@@ -91,20 +91,57 @@ pub async fn download_duckdb(version: &str) -> anyhow::Result<()> {
 
     // Extract binary from zip
     eprintln!("Extracting...");
-    let cursor = Cursor::new(bytes.to_vec());
-    let mut archive = zip::ZipArchive::new(cursor)?;
-
     let version_dir = DuckmanConfig::version_dir(&version);
     fs::create_dir_all(&version_dir)?;
     let binary_path = DuckmanConfig::version_binary(&version);
+
     // Extract to a temp file first, then rename, so an interrupted install never leaves a partial binary
     let tmp_path = binary_path.with_extension("tmp");
-    if let Err(e) = extract_binary(&mut archive, &tmp_path, &binary_path) {
+    let result = if asset_name.ends_with(".tar.gz") {
+        extract_binary_from_tar_gz(&bytes, &tmp_path, &binary_path)
+    } else {
+        zip::ZipArchive::new(Cursor::new(bytes))
+            .map_err(anyhow::Error::from)
+            .and_then(|mut archive| extract_binary(&mut archive, &tmp_path, &binary_path))
+    };
+    if let Err(e) = result {
         let _ = fs::remove_dir_all(&version_dir);
         return Err(e);
     }
 
     Ok(())
+}
+
+fn extract_binary_from_tar_gz(
+    bytes: &[u8],
+    tmp_path: &std::path::Path,
+    binary_path: &std::path::Path,
+) -> anyhow::Result<()> {
+    let decoder = flate2::read::GzDecoder::new(bytes);
+    let mut archive = tar::Archive::new(decoder);
+    let mut found = false;
+    for entry in archive.entries()? {
+        let mut entry = entry?;
+        if !entry.header().entry_type().is_file() {
+            continue;
+        }
+        let path = entry.path()?;
+        // Match "duckdb" or "duckdb.exe" anywhere in the archive path
+        let base = path.file_name().and_then(|n| n.to_str()).unwrap_or_default();
+        if base == "duckdb" || base == "duckdb.exe" {
+            let mut out = fs::File::create(tmp_path)?;
+            std::io::copy(&mut entry, &mut out)?;
+            out.sync_all()?;
+            found = true;
+            break;
+        }
+    }
+
+    if !found {
+        bail!("Could not find duckdb binary inside the downloaded archive.");
+    }
+
+    finalize_binary(tmp_path, binary_path)
 }
 
 fn extract_binary<R: std::io::Read + std::io::Seek>(
@@ -131,6 +168,11 @@ fn extract_binary<R: std::io::Read + std::io::Seek>(
         bail!("Could not find duckdb binary inside the downloaded archive.");
     }
 
+    finalize_binary(tmp_path, binary_path)
+}
+
+/// Make the extracted binary executable and move it into place
+fn finalize_binary(tmp_path: &std::path::Path, binary_path: &std::path::Path) -> anyhow::Result<()> {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -169,19 +211,19 @@ fn platform_asset_name(version: &str) -> &'static str {
 
 fn platform_asset_name_2() -> &'static str {
     if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
-        "duckdb_cli-osx-arm64.tar.gz"
+        "duckdb-cli-osx-arm64.tar.gz"
     } else if cfg!(target_os = "macos") {
-        "duckdb_cli-osx-amd64.tar.gz"
+        "duckdb-cli-osx-amd64.tar.gz"
     } else if cfg!(target_os = "linux") && cfg!(target_arch = "aarch64") {
-        "duckdb_cli-linux-arm64.tar.gz"
+        "duckdb-cli-linux-arm64.tar.gz"
     } else if cfg!(target_os = "linux") {
-        "duckdb_cli-linux-amd64.tar.gz"
+        "duckdb-cli-linux-amd64.tar.gz"
     } else if cfg!(target_os = "windows") && cfg!(target_arch = "aarch64") {
-        "duckdb_cli-windows-arm64.tar.gz"
+        "duckdb-cli-windows-arm64.tar.gz"
     } else if cfg!(target_os = "windows") {
-        "duckdb_cli-windows-amd64.tar.gz"
+        "duckdb-cli-windows-amd64.tar.gz"
     } else {
-        "duckdb_cli-linux-amd64.tar.gz"
+        "duckdb-cli-linux-amd64.tar.gz"
     }
 }
 
@@ -249,6 +291,29 @@ pub async fn fetch_release(version: &str) -> anyhow::Result<Option<GitHubRelease
 mod tests {
     use super::*;
     use testresult::TestResult;
+
+    #[test]
+    fn test_extract_binary_from_tar_gz() -> TestResult {
+        let content = b"fake duckdb binary";
+        let mut builder = tar::Builder::new(flate2::write::GzEncoder::new(
+            Vec::new(),
+            flate2::Compression::default(),
+        ));
+        let mut header = tar::Header::new_gnu();
+        header.set_size(content.len() as u64);
+        header.set_mode(0o755);
+        header.set_cksum();
+        builder.append_data(&mut header, "duckdb", &content[..])?;
+        let bytes = builder.into_inner()?.finish()?;
+
+        let dir = std::env::temp_dir().join("duckman-test-tar-gz");
+        fs::create_dir_all(&dir)?;
+        let binary_path = dir.join("duckdb");
+        extract_binary_from_tar_gz(&bytes, &binary_path.with_extension("tmp"), &binary_path)?;
+        assert_eq!(fs::read(&binary_path)?, content);
+        fs::remove_dir_all(&dir)?;
+        Ok(())
+    }
 
     #[tokio::test]
     async fn test_fetch_releases() -> TestResult {
